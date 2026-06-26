@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>V&J Electronics Import SAC — CRM v1.2</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<style>
+:root{--c1:#3B72D9;--c1d:#2D5FC7;--c1l:#F0F5FF;--c1t:#254A9A;--c2:#E8960A;--c2l:#FDF5D8;--c2t:#7A3D12;--ok:#22A87A;--okl:#DFFAEE;--okt:#136648;--red:#E05555;--redl:#FDEAEA;--pur:#7048D4;--purl:#F4EFFF;--purt:#4A2492;--bg:#F9FAFB;--bg2:#FFFFFF;--bg3:#F4F6F9;--text:#18243A;--text2:#6B7A94;--text3:#9BA8BB;--bdr:1px solid #E8EBF0;--bdr2:1px solid #D4D9E4;--r:8px;--rl:14px;--sh:0 1px 3px rgba(0,0,0,.07);--sh2:0 4px 16px rgba(37,99,235,.12);--tr:.18s cubic-bezier(.4,0,.2,1)}
+@media(prefers-color-scheme:dark){:root{--bg:#0F172A;--bg2:#1E293B;--bg3:#243044;--text:#F1F5F9;--text2:#94A3B8;--text3:#475569;--bdr:1px solid rgba(255,255,255,.08);--bdr2:1px solid rgba(255,255,255,.14);--c1l:#1e3a8a;--c2l:#78350f;--okl:#064e3b;--redl:#7f1d1d;--purl:#2d1b69}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;color:var(--text);background:var(--bg)}
+button{font-family:inherit;cursor:pointer}input,textarea,select{font-family:inherit}
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a2d6e,#3B72D9 55%,#7048D4);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.lcard{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.3);animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.llogo-box{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#2040A0,#3B72D9);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;overflow:hidden}
+.llogo-box img{width:100%;height:100%;object-fit:cover;display:none}.llogo-box i{font-size:34px;color:#fff}
+.lerr{background:#FEE2E2;color:#7f1d1d;border-radius:8px;padding:10px 13px;font-size:13px;margin-bottom:12px;display:none;align-items:center;gap:7px}.lerr.show{display:flex}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--bg2);border-right:var(--bdr);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:60;transition:transform var(--tr)}
+.sb-logo{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:var(--bdr);cursor:pointer;position:relative}.sb-logo:hover{background:var(--bg3)}
+.sb-logo-box{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2040A0,#3B72D9);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.sb-logo-box img{width:100%;height:100%;object-fit:cover;display:none}.sb-logo-box i{color:#fff;font-size:20px}
+.sb-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.2}.sb-sub{font-size:10px;color:var(--text3)}
+.sb-edit{position:absolute;bottom:4px;right:6px;font-size:10px;color:var(--text3);opacity:0;transition:opacity var(--tr)}.sb-logo:hover .sb-edit{opacity:1}
+.nav{flex:1;padding:8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text2);transition:all var(--tr);border:none;background:transparent;width:100%;text-align:left;cursor:pointer}
+.ni i{font-size:17px;flex-shrink:0}.ni:hover{background:var(--bg3);color:var(--text)}.ni.active{background:var(--c1l);color:var(--c1t);font-weight:600}.ni.active i{color:var(--c1)}
+.nsep{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:10px 12px 4px}
+.nbadge{margin-left:auto;background:var(--c1l);color:var(--c1);font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px}.nbadge.red{background:var(--redl);color:var(--red)}
+.sb-bottom{padding:10px 8px;border-top:var(--bdr)}
+.sync-pill{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:var(--r);background:var(--bg3);font-size:12px;color:var(--text2);margin-bottom:6px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0}.sdot.sync{background:var(--c2);animation:pulse 1s ease infinite}.sdot.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.main{flex:1;margin-left:220px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:var(--bdr);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.tb-title{font-size:15px;font-weight:600;flex:1;min-width:100px;display:flex;align-items:center;gap:8px}.tb-title i{color:var(--c1)}
+.sw{position:relative;flex:2;max-width:320px}.sw input{width:100%;padding:8px 10px 8px 34px;border:var(--bdr2);border-radius:var(--r);background:var(--bg3);color:var(--text);font-size:14px;transition:all var(--tr)}.sw input:focus{outline:none;border-color:var(--c1);background:var(--bg2);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.sw i.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none}
+.content{flex:1;padding:20px;max-width:1080px;width:100%;margin:0 auto}
+.btn{border:var(--bdr2);background:var(--bg2);border-radius:var(--r);padding:8px 14px;font-size:13px;font-weight:500;color:var(--text);display:inline-flex;align-items:center;gap:6px;transition:all var(--tr);white-space:nowrap;cursor:pointer}
+.btn:hover{background:var(--bg3);border-color:var(--c1);transform:translateY(-1px);box-shadow:var(--sh)}.btn:active{transform:translateY(0)}
+.btn.primary{background:var(--c1);color:#fff;border-color:var(--c1);box-shadow:var(--sh2)}.btn.primary:hover{background:var(--c1d)}
+.btn.success{background:var(--ok);color:#fff;border-color:var(--ok)}.btn.success:hover{background:#059669}
+.btn.amber{background:var(--c2);color:#fff;border-color:var(--c2)}.btn.amber:hover{background:#D97706}
+.btn.pur{background:var(--pur);color:#fff;border-color:var(--pur)}.btn.pur:hover{background:#6D28D9}
+.btn.danger{color:var(--red);border-color:var(--red)}.btn.danger:hover{background:var(--redl)}
+.btn.ghost{border:none;background:transparent;color:var(--text2)}.btn.ghost:hover{background:var(--bg3);color:var(--text)}
+.btn.sm{padding:5px 10px;font-size:12px}.btn.lg{padding:11px 20px;font-size:14px}.btn.icon{padding:7px;border-radius:50%;border-color:transparent}.btn.icon:hover{background:var(--bg3)}
+.btn-group{display:flex;gap:6px;flex-wrap:wrap}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:18px}
+.stat-card{background:var(--bg2);border:var(--bdr);border-radius:var(--rl);padding:14px;display:flex;align-items:center;gap:12px;transition:all var(--tr)}.stat-card:hover{box-shadow:var(--sh);transform:translateY(-1px)}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.si-blue{background:var(--c1l);color:var(--c1)}.si-green{background:var(--okl);color:var(--ok)}.si-amber{background:var(--c2l);color:var(--c2)}.si-red{background:var(--redl);color:var(--red)}.si-pur{background:var(--purl);color:var(--pur)}
+.stat-val{font-size:22px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px}
+.ccard{background:var(--bg2);border:var(--bdr);border-radius:var(--rl);padding:14px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
+.ccard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--c1),var(--c2));opacity:0;transition:opacity var(--tr)}
+.ccard:hover{border-color:var(--c1);box-shadow:var(--sh2);transform:translateY(-2px)}.ccard:hover::before,.ccard.sel::before{opacity:1}.ccard.sel{border-color:var(--c1);border-width:2px}
+.av{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.b-blue{background:var(--c1l);color:var(--c1t)}.b-green{background:var(--okl);color:var(--okt)}.b-amber{background:var(--c2l);color:var(--c2t)}.b-red{background:var(--redl);color:#7f1d1d}.b-pur{background:var(--purl);color:var(--purt)}
+.dw{display:grid;grid-template-columns:270px 1fr;gap:14px}.dside{display:flex;flex-direction:column;gap:10px}
+.cbox{background:var(--bg2);border:var(--bdr);border-radius:var(--rl);padding:14px}
+.cbt{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}.cbt i{color:var(--c1)}
+.irow{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:var(--bdr);font-size:13px}.irow:last-child{border:none;padding-bottom:0}
+.irow i{font-size:15px;color:var(--c1);flex-shrink:0;margin-top:1px}.ilbl{font-size:11px;color:var(--text3);font-weight:500}.ival{color:var(--text);margin-top:1px}
+.sh2{display:flex;align-items:center;gap:8px;margin:14px 0 10px}.sh2-line{flex:1;height:1px;background:var(--bg3)}.sh2 span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);white-space:nowrap}.sh2 i{color:var(--c1);font-size:14px}
+.mc{background:var(--bg2);border:var(--bdr);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}.mc-head{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg3)}
+.mc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.mi-laser{background:var(--c2l);color:var(--c2t)}.mi-co2{background:var(--c1l);color:var(--c1t)}.mi-marcado{background:var(--okl);color:var(--okt)}.mi-plasma{background:var(--redl);color:#7f1d1d}.mi-router{background:var(--purl);color:var(--purt)}.mi-otro{background:var(--bg3);color:var(--text2)}
+.mc-chev{font-size:15px;color:var(--text3);transition:transform var(--tr);flex-shrink:0}.mc-chev.open{transform:rotate(180deg)}.mc-body{padding:14px;display:none}.mc-body.open{display:block}
+.specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px}.spec{background:var(--bg3);border-radius:6px;padding:7px 10px}.spec-v{font-weight:600;font-size:12px;color:var(--text);margin-bottom:1px}.spec-l{font-size:10px;color:var(--text3)}
+.maq-note{background:var(--c1l);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--c1t);margin-top:8px;display:flex;gap:6px;line-height:1.5}
+.note-item{background:var(--bg2);border:var(--bdr);border-left:3px solid var(--c1);border-radius:0 var(--r) var(--r) 0;padding:10px 12px;margin-bottom:6px;font-size:13px;color:var(--text2);line-height:1.5}.note-item:hover{border-left-color:var(--c2)}
+.note-date{font-size:11px;color:var(--text3);margin-top:4px;display:flex;align-items:center;gap:4px}
+.mnt-item{background:var(--bg2);border:var(--bdr);border-left:3px solid var(--ok);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-bottom:8px}.mnt-item:hover{border-left-color:var(--c1)}.mnt-item.vencido{border-left-color:var(--red)}
+.rep-item{background:var(--bg2);border:var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.rep-icon{width:32px;height:32px;border-radius:8px;background:var(--purl);color:var(--pur);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.rec-item{background:var(--bg2);border:var(--bdr);border-radius:var(--rl);padding:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.rec-item.vencido{border-color:var(--red);background:var(--redl)}.rec-item.hoy{border-color:var(--c2);background:var(--c2l)}.rec-item.proximo{border-color:var(--ok);background:var(--okl)}
+.ri-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ri-red{background:var(--red);color:#fff}.ri-amber{background:var(--c2);color:#fff}.ri-green{background:var(--ok);color:#fff}.ri-blue{background:var(--c1);color:#fff}
+.ttag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.t-laser{background:var(--c2l);color:var(--c2t)}.t-co2{background:var(--c1l);color:var(--c1t)}.t-marcado{background:var(--okl);color:var(--okt)}.t-plasma{background:var(--redl);color:#7f1d1d}.t-router{background:var(--purl);color:var(--purt)}.t-otro{background:var(--bg3);color:var(--text2)}
+.fab{position:fixed;bottom:22px;right:22px;z-index:100;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--pur));color:#fff;border:none;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,99,235,.35);cursor:pointer;transition:all var(--tr)}.fab:hover{transform:scale(1.08)}
+.mbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;backdrop-filter:blur(2px)}.mbg.open{display:flex}
+.mod{background:var(--bg2);border-radius:var(--rl);border:var(--bdr);width:100%;max-width:640px;padding:20px;margin-top:20px;margin-bottom:20px;animation:fadeUp .22s ease;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.mtt{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px}.mtt .l{display:flex;align-items:center;gap:8px}.mtt i{color:var(--c1)}
+.fg{margin-bottom:11px}.fl{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.04em}.req{color:var(--c1)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+input[type=text],input[type=tel],input[type=email],input[type=password],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;padding:8px 11px;border:var(--bdr2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:13px;transition:all var(--tr)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--c1);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:70px;line-height:1.55}
+.iw{position:relative}.iw i.ii{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}.iw input{padding-left:30px}
+.sfh{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c1);padding:9px 0 5px;margin-top:4px;border-bottom:2px solid var(--c1l);margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:var(--bdr2);background:var(--bg3);color:var(--text2);transition:all var(--tr);display:flex;align-items:center;gap:4px}.chip:hover{border-color:var(--c1);color:var(--c1)}
+.chip.s-laser{background:var(--c2l);color:var(--c2t);border-color:var(--c2)}.chip.s-co2{background:var(--c1l);color:var(--c1t);border-color:var(--c1)}.chip.s-marcado{background:var(--okl);color:var(--okt);border-color:var(--ok)}.chip.s-plasma{background:var(--redl);color:#7f1d1d;border-color:var(--red)}.chip.s-router{background:var(--purl);color:var(--purt);border-color:var(--pur)}.chip.s-otro{background:var(--bg3);color:var(--text2);border-color:var(--text3)}
+.sugbox{background:var(--c1l);border:1px solid rgba(37,99,235,.2);border-radius:var(--r);padding:9px 12px;margin-bottom:10px;font-size:12px;color:var(--c1t);line-height:1.6;display:flex;gap:7px;align-items:flex-start}.sugbox i{flex-shrink:0;font-size:15px;margin-top:1px;color:var(--c1)}
+#toast{position:fixed;bottom:18px;right:18px;z-index:400;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.ti2{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--rl);font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.15);animation:fadeUp .25s ease;pointer-events:all}
+.ti2.ok{background:var(--okl);color:var(--okt)}.ti2.err{background:var(--redl);color:#7f1d1d}.ti2.info{background:var(--c1l);color:var(--c1t)}.ti2.warn{background:var(--c2l);color:var(--c2t)}
+.cfg-hero{background:linear-gradient(135deg,#2040A0,#3B72D9,#7048D4);padding:24px;color:#fff;border-radius:var(--rl) var(--rl) 0 0}
+.cfg-hero h2{font-size:18px;font-weight:700;display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.step{display:flex;gap:10px;padding:10px;background:var(--bg3);border-radius:var(--r);margin-bottom:8px;font-size:12px;color:var(--text2);line-height:1.6}
+.snum{width:22px;height:22px;border-radius:50%;background:var(--c1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step strong{display:block;color:var(--text);margin-bottom:2px}.step a{color:var(--c1);font-weight:600}
+.lup{border:2px dashed var(--bdr2);border-radius:var(--rl);padding:18px;text-align:center;cursor:pointer;transition:all var(--tr)}.lup:hover{border-color:var(--c1);background:var(--c1l)}
+.lup-prev{width:68px;height:68px;border-radius:10px;object-fit:cover;margin:0 auto 8px;display:block;border:var(--bdr)}
+.empty{text-align:center;padding:48px 20px;color:var(--text2)}.empty .ei{font-size:44px;display:block;margin-bottom:10px;opacity:.25}.empty h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}.empty p{font-size:13px;margin-bottom:16px}
+.loader{display:flex;align-items:center;justify-content:center;padding:48px;color:var(--text2);gap:10px;font-size:14px}
+@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin 1s linear infinite}
+.ham{display:none;border:none;background:transparent;font-size:22px;color:var(--text);padding:6px;cursor:pointer}.sov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:55}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.ham{display:block}.sov.open{display:block}.dw{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.fr3{grid-template-columns:1fr 1fr}.fab{bottom:14px;right:14px}.content{padding:10px}.stats-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:400px){.fr3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div id="loginScreen">
+<div class="lcard">
+  <div style="text-align:center;margin-bottom:22px">
+    <div class="llogo-box" id="llbox"><i class="ti ti-scan" id="lli"></i><img id="llimg" src=""></div>
+    <div style="font-size:19px;font-weight:700;color:#0F172A;margin-top:10px" id="lco">V&J Electronics</div>
+    <div style="font-size:12px;color:#64748B;margin-top:2px">CRM Técnico v1.2 — Acceso seguro</div>
+  </div>
+  <div class="lerr" id="lerr"><i class="ti ti-alert-circle"></i><span id="lerrtxt"></span></div>
+  <div class="fg"><label class="fl"><i class="ti ti-mail"></i> Correo</label>
+    <div class="iw"><i class="ti ti-mail ii"></i><input type="email" id="li_e" placeholder="tu@correo.com" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
+  <div class="fg"><label class="fl"><i class="ti ti-lock"></i> Contraseña</label>
+    <div class="iw" style="position:relative"><i class="ti ti-lock ii"></i>
+      <input type="password" id="li_p" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:38px">
+      <button onclick="togglePass()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;color:#94A3B8;font-size:15px" id="tpb"><i class="ti ti-eye"></i></button>
+    </div></div>
+  <button class="btn primary lg" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()" id="lbtn"><i class="ti ti-login"></i> Ingresar</button>
+  <div style="text-align:center;margin-top:12px;font-size:11px;color:#94A3B8"><i class="ti ti-shield-lock"></i> Protegido con Firebase Authentication</div>
+  <div style="text-align:center;margin-top:6px"><button class="btn ghost sm" style="font-size:11px;color:#94A3B8" onclick="openCfg()"><i class="ti ti-settings"></i> Configurar Firebase</button></div>
+</div>
+</div>
+
+<!-- APP SHELL -->
+<div class="shell" id="appShell" style="display:none">
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo" onclick="openModal('brand')" title="Editar empresa">
+    <div class="sb-logo-box" id="sblogobox"><i class="ti ti-scan" id="sblogoi"></i><img id="sblogoimg" src=""></div>
+    <div><div class="sb-name" id="sbname">V&J Electronics</div><div class="sb-sub">CRM Técnico v1.2</div></div>
+    <span class="sb-edit"><i class="ti ti-pencil"></i></span>
+  </div>
+  <nav class="nav">
+    <button class="ni active" id="ni-dash" onclick="goSec('dash')"><i class="ti ti-chart-bar"></i> Dashboard</button>
+    <button class="ni" id="ni-clients" onclick="goSec('clients')"><i class="ti ti-users"></i> Clientes <span class="nbadge" id="nc">0</span></button>
+    <button class="ni" id="ni-informes" onclick="goSec('informes')"><i class="ti ti-clipboard-list"></i> Informes <span class="nbadge" id="ninf">0</span></button>
+    <button class="ni" id="ni-mant" onclick="goSec('mant')"><i class="ti ti-tool"></i> Mantenimientos</button>
+    <button class="ni" id="ni-recs" onclick="goSec('recs')"><i class="ti ti-bell"></i> Recordatorios <span class="nbadge red" id="nrec" style="display:none">!</span></button>
+    <button class="ni" id="ni-reps" onclick="goSec('reps')"><i class="ti ti-package"></i> Repuestos</button>
+    <div class="nsep">Sistema</div>
+    <button class="ni" onclick="openCfg()"><i class="ti ti-database"></i> Firebase</button>
+    <button class="ni" onclick="openModal('brand')"><i class="ti ti-building"></i> Mi empresa</button>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sync-pill"><div class="sdot" id="sdot"></div><span id="slbl" style="font-size:11px">Desconectado</span></div>
+    <div style="font-size:10px;color:var(--text3);padding:2px 4px 5px;display:flex;align-items:center;gap:3px"><i class="ti ti-user" style="font-size:12px"></i><span id="uemail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div>
+    <button class="btn danger sm" style="width:100%;justify-content:center" onclick="doLogout()"><i class="ti ti-logout"></i> Cerrar sesión</button>
+  </div>
+</aside>
+<div class="sov" id="sov" onclick="closeSB()"></div>
+<div class="main">
+  <div class="topbar">
+    <button class="ham" onclick="openSB()"><i class="ti ti-menu-2"></i></button>
+    <div class="tb-title" id="tbtitle"><i class="ti ti-chart-bar"></i> Dashboard</div>
+    <div class="sw" id="swrap" style="display:none"><i class="ti ti-search si"></i><input type="text" id="si" placeholder="Buscar cliente, RUC..." oninput="filterClients()"></div>
+    <div class="btn-group">
+      <button class="btn primary" id="btnNew" style="display:none" onclick="openModal('nc')"><i class="ti ti-plus"></i> Nuevo cliente</button>
+      <button class="btn success" id="btnInf" style="display:none" onclick="openModal('inf',null)"><i class="ti ti-plus"></i> Nuevo informe</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="sec-dash">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="cbox"><div class="cbt"><i class="ti ti-bell"></i> Próximos recordatorios</div><div id="dashRecs"></div></div>
+        <div class="cbox"><div class="cbt"><i class="ti ti-clipboard-list"></i> Últimos informes</div><div id="dashInfs"></div></div>
+      </div>
+    </div>
+    <div id="sec-clients" style="display:none">
+      <div id="lgrid" class="loader"><i class="ti ti-loader-2 spin"></i> Cargando...</div>
+      <div class="cgrid" id="cg" style="display:none"></div>
+      <div id="nores" class="empty" style="display:none"><i class="ti ti-users ei"></i><h3>Sin clientes</h3><p>Agrega tu primer cliente.</p><button class="btn primary lg" onclick="openModal('nc')"><i class="ti ti-plus"></i> Agregar</button></div>
+    </div>
+    <div id="sec-detail" style="display:none">
+      <div style="margin-bottom:12px"><button class="btn ghost" onclick="backClients()"><i class="ti ti-arrow-left"></i> Clientes</button></div>
+      <div class="dw"><div class="dside" id="dside"></div><div id="dmain"></div></div>
+    </div>
+    <div id="sec-informes" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--text2)">Historial de informes de servicio técnico</div>
+        <button class="btn success" onclick="openModal('inf',null)"><i class="ti ti-plus"></i> Nuevo informe</button>
+      </div>
+      <div id="infList"></div>
+    </div>
+    <div id="sec-mant" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--text2)">Historial de mantenimientos</div>
+        <button class="btn success" onclick="openModal('mnt',null)"><i class="ti ti-plus"></i> Nuevo</button>
+      </div>
+      <div id="mantList"></div>
+    </div>
+    <div id="sec-recs" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--text2)">Alertas y recordatorios de servicio</div>
+        <button class="btn amber" onclick="openModal('rec',null)"><i class="ti ti-plus"></i> Nuevo</button>
+      </div>
+      <div id="recList"></div>
+    </div>
+    <div id="sec-reps" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--text2)">Registro de repuestos vendidos / instalados</div>
+        <button class="btn pur" onclick="openModal('rep',null)"><i class="ti ti-plus"></i> Registrar</button>
+      </div>
+      <div id="repList"></div>
+    </div>
+  </div>
+</div>
+</div>
+<button class="fab" onclick="fabAction()" title="Acción rápida"><i class="ti ti-plus"></i></button>
+<div id="toast"></div>
+
+<!-- MODALES -->
+<!-- Firebase Config -->
+<div class="mbg" id="mCFG"><div class="mod" style="padding:0;overflow:hidden">
+  <div class="cfg-hero"><h2><i class="ti ti-database"></i> Conectar Firebase</h2><p style="font-size:12px;opacity:.85">Sincronización en tiempo real entre celular y computadora.</p>
+    <button class="btn sm" style="margin-top:10px;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="closeModal('mCFG')">Cerrar</button></div>
+  <div style="padding:18px">
+    <div class="step"><div class="snum">1</div><div><strong>Firebase Console</strong><a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></div></div>
+    <div class="step"><div class="snum">2</div><div><strong>Crear proyecto</strong>Agregar proyecto → nombre → desactiva Analytics → Crear.</div></div>
+    <div class="step"><div class="snum">3</div><div><strong>Firestore</strong>Firestore Database → Crear → Modo prueba → us-central1.</div></div>
+    <div class="step"><div class="snum">4</div><div><strong>Authentication</strong>Authentication → Correo/Contraseña → Habilitar → Agregar usuario.</div></div>
+    <div class="step"><div class="snum">5</div><div><strong>Credenciales</strong>⚙️ Configuración → General → Apps → &lt;/&gt; → Config → copiar valores.</div></div>
+    <div class="fr" style="margin-top:12px">
+      <div class="fg"><label class="fl">API Key <span class="req">*</span></label><input type="text" id="cfg_apiKey" placeholder="AIzaSy..."></div>
+      <div class="fg"><label class="fl">Project ID <span class="req">*</span></label><input type="text" id="cfg_projectId" placeholder="mi-crm"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Auth Domain</label><input type="text" id="cfg_authDomain" placeholder="mi-crm.firebaseapp.com"></div>
+      <div class="fg"><label class="fl">Storage Bucket</label><input type="text" id="cfg_storageBucket" placeholder="mi-crm.appspot.com"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Messaging Sender ID</label><input type="text" id="cfg_msgId" placeholder="123456789"></div>
+      <div class="fg"><label class="fl">App ID</label><input type="text" id="cfg_appId" placeholder="1:123:web:abc"></div>
+    </div>
+    <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+      <button class="btn" onclick="useDemoMode()"><i class="ti ti-device-laptop"></i> Modo local</button>
+      <button class="btn primary" onclick="initFirebase()"><i class="ti ti-database"></i> Conectar</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- Brand -->
+<div class="mbg" id="mBrand"><div class="mod" style="max-width:420px">
+  <div class="mtt"><div class="l"><i class="ti ti-building"></i> Mi empresa</div><button class="btn icon ghost" onclick="closeModal('mBrand')"><i class="ti ti-x"></i></button></div>
+  <div class="fg"><label class="fl">Nombre de la empresa</label><input type="text" id="br_n" placeholder="V&J Electronics Import SAC"></div>
+  <div class="fg"><label class="fl">Dirección</label><input type="text" id="br_dir" placeholder="Av. Ejemplo 123, Lima"></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Teléfono</label><input type="text" id="br_tel" placeholder="+51 999 999 999"></div>
+    <div class="fg"><label class="fl">Correo</label><input type="text" id="br_email" placeholder="info@vjelectronics.com"></div>
+  </div>
+  <div class="fg"><label class="fl">Página web</label><input type="text" id="br_web" placeholder="www.vjelectronics.com"></div>
+  <div class="fg"><label class="fl">Eslogan / descripción corta</label><input type="text" id="br_eslogan" placeholder="Especialistas en maquinaria CNC y láser"></div>
+  <div class="fg"><label class="fl">Logo</label>
+    <div class="lup" onclick="document.getElementById('br_f').click()">
+      <input type="file" id="br_f" accept="image/*" onchange="prevLogo(event)">
+      <img id="br_prev" class="lup-prev" src="" style="display:none">
+      <i class="ti ti-upload" id="br_icon" style="font-size:26px;color:var(--text3);display:block;margin-bottom:5px"></i>
+      <div style="font-size:12px;color:var(--text2)">Clic para subir logo</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">PNG, JPG — máx. 2MB</div>
+    </div></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:4px">
+    <button class="btn" onclick="closeModal('mBrand')">Cancelar</button>
+    <button class="btn primary" onclick="saveBrand()"><i class="ti ti-check"></i> Guardar</button>
+  </div>
+</div></div>
+
+<!-- Nuevo Cliente -->
+<div class="mbg" id="mNC"><div class="mod">
+  <div class="mtt"><div class="l"><i class="ti ti-user-plus"></i> Nuevo cliente</div><button class="btn icon ghost" onclick="closeModal('mNC')"><i class="ti ti-x"></i></button></div>
+  <div class="fg"><label class="fl">Nombre / Razón social <span class="req">*</span></label><input type="text" id="nc_n" placeholder="Ej: Metalmecánica Torres S.A.C." oninput="sugName()"></div>
+  <div id="nc_sg" style="display:none" class="sugbox"><i class="ti ti-bulb"></i><span id="nc_sgt"></span></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">RUC / DNI</label><div class="iw"><i class="ti ti-id-badge ii"></i><input type="text" id="nc_r" placeholder="20512345678" maxlength="11"></div></div>
+    <div class="fg"><label class="fl">Tipo</label><select id="nc_t"><option value="empresa">Empresa</option><option value="persona">Persona natural</option></select></div>
+  </div>
+  <div class="fg"><label class="fl">Dirección</label><div class="iw"><i class="ti ti-map-pin ii"></i><input type="text" id="nc_d" placeholder="Av. Industrial 1234, Lima"></div></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Teléfono</label><div class="iw"><i class="ti ti-phone ii"></i><input type="tel" id="nc_p" placeholder="+51 999 999 999"></div></div>
+    <div class="fg"><label class="fl">Correo</label><div class="iw"><i class="ti ti-mail ii"></i><input type="email" id="nc_e" placeholder="correo@empresa.com"></div></div>
+  </div>
+  <div class="fg"><label class="fl">Contacto principal</label><div class="iw"><i class="ti ti-user ii"></i><input type="text" id="nc_c" placeholder="Nombre del responsable"></div></div>
+  <div class="fg"><label class="fl">Notas iniciales</label><textarea id="nc_no" placeholder="Observaciones, referidos..."></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mNC')">Cancelar</button>
+    <button class="btn primary" onclick="saveClient()"><i class="ti ti-check"></i> Guardar</button>
+  </div>
+</div></div>
+
+<!-- Nueva Máquina -->
+<div class="mbg" id="mMQ"><div class="mod" style="max-width:660px">
+  <div class="mtt"><div class="l"><i class="ti ti-cpu"></i> Registrar máquina</div><button class="btn icon ghost" onclick="closeModal('mMQ')"><i class="ti ti-x"></i></button></div>
+  <div class="fg"><label class="fl">Tipo <span class="req">*</span></label>
+    <div class="chips" id="tChips">
+      <button class="chip" data-tipo="laser" onclick="selTipo('laser',this)"><i class="ti ti-bolt"></i> Láser fibra</button>
+      <button class="chip" data-tipo="co2" onclick="selTipo('co2',this)"><i class="ti ti-wave-sine"></i> CO₂</button>
+      <button class="chip" data-tipo="marcado" onclick="selTipo('marcado',this)"><i class="ti ti-tag"></i> Marcado láser</button>
+      <button class="chip" data-tipo="plasma" onclick="selTipo('plasma',this)"><i class="ti ti-flame"></i> Plasma CNC</button>
+      <button class="chip" data-tipo="router" onclick="selTipo('router',this)"><i class="ti ti-settings"></i> Router CNC</button>
+      <button class="chip" data-tipo="otro" onclick="selTipo('otro',this)"><i class="ti ti-tool"></i> Otro</button>
+    </div></div>
+  <div id="mq_sg" style="display:none" class="sugbox"><i class="ti ti-info-circle"></i><span id="mq_sgt"></span></div>
+  <div id="mq_campos"></div>
+  <div class="fg" style="margin-top:8px"><label class="fl">Notas técnicas</label><textarea id="mq_notas" placeholder="Intervenciones previas, configuraciones especiales..."></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mMQ')">Cancelar</button>
+    <button class="btn primary" onclick="saveMachine()"><i class="ti ti-check"></i> Guardar máquina</button>
+  </div>
+</div></div>
+
+<!-- Nota -->
+<div class="mbg" id="mNT"><div class="mod" style="max-width:420px">
+  <div class="mtt"><div class="l"><i class="ti ti-notes"></i> Nueva nota</div><button class="btn icon ghost" onclick="closeModal('mNT')"><i class="ti ti-x"></i></button></div>
+  <div class="fg"><label class="fl">Nota / observación</label><textarea id="nt_tx" style="min-height:100px" placeholder="Visita técnica, acuerdo, observación..."></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mNT')">Cancelar</button>
+    <button class="btn primary" onclick="saveNote()"><i class="ti ti-check"></i> Guardar</button>
+  </div>
+</div></div>
+
+<!-- INFORME DE SERVICIO -->
+<div class="mbg" id="mINF"><div class="mod" style="max-width:700px">
+  <div class="mtt"><div class="l"><i class="ti ti-clipboard-list"></i> Informe de Servicio Técnico</div><button class="btn icon ghost" onclick="closeModal('mINF')"><i class="ti ti-x"></i></button></div>
+  <div class="fg"><label class="fl">Tipo de servicio <span class="req">*</span></label>
+    <div class="chips" id="infTipoChips">
+      <button class="chip" onclick="selInfTipo('Diagnóstico',this)"><i class="ti ti-stethoscope"></i> Diagnóstico</button>
+      <button class="chip" onclick="selInfTipo('Preventivo',this)"><i class="ti ti-shield-check"></i> Preventivo</button>
+      <button class="chip" onclick="selInfTipo('Correctivo',this)"><i class="ti ti-tool"></i> Correctivo</button>
+      <button class="chip" onclick="selInfTipo('Instalación',this)"><i class="ti ti-plug"></i> Instalación</button>
+      <button class="chip" onclick="selInfTipo('Capacitación',this)"><i class="ti ti-school"></i> Capacitación</button>
+    </div></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cliente <span class="req">*</span></label><select id="inf_cli" onchange="loadMaqForInf()"><option value="">Seleccionar...</option></select></div>
+    <div class="fg"><label class="fl">Máquina intervenida</label><select id="inf_maq" onchange="refreshChecklist()"><option value="">Seleccionar...</option></select></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Fecha <span class="req">*</span></label><input type="date" id="inf_fecha"></div>
+    <div class="fg"><label class="fl">N° Orden de trabajo</label><input type="text" id="inf_ot" placeholder="OT-2026-001"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Hora inicio</label><input type="time" id="inf_hi"></div>
+    <div class="fg"><label class="fl">Hora fin</label><input type="time" id="inf_hf"></div>
+  </div>
+  <div class="fg"><label class="fl">Técnico responsable</label><input type="text" id="inf_tec" placeholder="Nombre del técnico"></div>
+  <div class="sfh"><i class="ti ti-message-circle"></i> 1. Requerimiento del cliente</div>
+  <div class="fg"><label class="fl">Fallas reportadas <span class="req">*</span></label><textarea id="inf_req" placeholder="¿Qué fallas reportó el cliente? ¿Qué solicitó?..." style="min-height:80px"></textarea></div>
+  <div class="fg"><label class="fl">¿Desde cuándo ocurre?</label><input type="text" id="inf_desde" placeholder="Ej: Desde hace 2 semanas..."></div>
+  <div class="fg"><label class="fl">¿Intervención previa?</label><select id="inf_prev"><option value="No">No — primera intervención</option><option value="Sí">Sí — ver historial</option><option value="Desconoce">Desconoce</option></select></div>
+  <div class="sfh"><i class="ti ti-zoom-check"></i> 2. Hallazgos e inspección</div>
+  <div class="fg"><label class="fl">Revisión visual y pruebas realizadas</label><textarea id="inf_hall" placeholder="Describe lo encontrado al inspeccionar el equipo..." style="min-height:80px"></textarea></div>
+  <div class="fg"><label class="fl">Mediciones y valores registrados</label><textarea id="inf_med" placeholder="Voltajes, presiones, temperaturas, lecturas, códigos de error..."></textarea></div>
+  <div class="fg"><label class="fl">¿Se replicó la falla?</label><select id="inf_replica"><option>Sí — se replicó exitosamente</option><option>No — falla intermitente</option><option>No — no presente al momento</option><option>N/A — servicio preventivo</option></select></div>
+  <div class="sfh"><i class="ti ti-hammer"></i> 3. Solución aplicada</div>
+  <div class="fg"><label class="fl">Trabajos realizados <span class="req">*</span></label><textarea id="inf_sol" placeholder="Describe paso a paso qué se realizó..." style="min-height:90px"></textarea></div>
+  <div class="fg"><label class="fl">Repuestos utilizados</label><textarea id="inf_reps" placeholder="Lista los repuestos instalados con referencia y cantidad..."></textarea></div>
+  <div class="sfh"><i class="ti ti-activity"></i> 4. Pruebas de funcionamiento</div>
+  <div class="fg"><label class="fl">Pruebas post-intervención</label><textarea id="inf_pruebas" placeholder="Cortes de prueba, parámetros, materiales, resultados..."></textarea></div>
+  <div class="fg"><label class="fl">Resultado</label><select id="inf_resultado"><option value="Satisfactorio">✅ Satisfactorio — máquina operativa</option><option value="Parcial">⚠️ Parcial — con observaciones</option><option value="No satisfactorio">❌ No satisfactorio — requiere seguimiento</option></select></div>
+  <div class="sfh"><i class="ti ti-report-analytics"></i> 5. Diagnóstico y análisis técnico</div>
+  <div class="fg"><label class="fl">Diagnóstico final <span class="req">*</span></label><textarea id="inf_diag" placeholder="Diagnóstico técnico conclusivo..." style="min-height:80px"></textarea></div>
+  <div class="fg"><label class="fl">Análisis de causa raíz</label><textarea id="inf_causa" placeholder="¿Por qué ocurrió la falla?..."></textarea></div>
+  <div class="fg"><label class="fl">Observaciones y recomendaciones</label><textarea id="inf_obs" placeholder="Qué debe hacer el cliente para prevenir fallas futuras..."></textarea></div>
+  <div class="sfh"><i class="ti ti-checkbox"></i> 6. Checklist de revisión</div>
+  <div id="inf_checklist_container"><div style="font-size:12px;color:var(--text2);padding:6px 0">Selecciona tipo de servicio y máquina para ver el checklist.</div></div>
+  <div class="sfh"><i class="ti ti-camera"></i> 7. Fotografías</div>
+  <div class="fg">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="inf_photos_grid">
+      <div style="aspect-ratio:1;border:2px dashed var(--bdr2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text3);transition:all var(--tr)" onclick="triggerPhotoUpload()" onmouseover="this.style.borderColor='var(--c1)';this.style.background='var(--c1l)'" onmouseout="this.style.borderColor='';this.style.background=''">
+        <i class="ti ti-camera-plus" style="font-size:22px"></i>Agregar foto
+      </div>
+    </div>
+    <input type="file" id="inf_photo_input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+    <div id="inf_photos_list" style="margin-top:8px"></div>
+  </div>
+  <div class="sfh"><i class="ti ti-signature"></i> 8. Conformidad</div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Nombre de quien recibe</label><input type="text" id="inf_receptor" placeholder="Nombre y cargo..."></div>
+    <div class="fg"><label class="fl">Próximo mantenimiento</label><input type="date" id="inf_prox"></div>
+  </div>
+  <div class="fg"><label class="fl">Observaciones del cliente</label><textarea id="inf_obscliente" placeholder="Comentarios del cliente..." style="min-height:60px"></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:8px">
+    <button class="btn" onclick="closeModal('mINF')">Cancelar</button>
+    <button class="btn success" onclick="saveInforme(false)"><i class="ti ti-device-floppy"></i> Guardar</button>
+    <button class="btn primary" onclick="saveInforme(true)"><i class="ti ti-file-type-pdf"></i> Guardar y PDF</button>
+  </div>
+</div></div>
+
+<!-- Mantenimiento -->
+<div class="mbg" id="mMNT"><div class="mod" style="max-width:520px">
+  <div class="mtt"><div class="l"><i class="ti ti-tool"></i> Registro de mantenimiento</div><button class="btn icon ghost" onclick="closeModal('mMNT')"><i class="ti ti-x"></i></button></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cliente <span class="req">*</span></label><select id="mnt_cli"><option value="">Seleccionar...</option></select></div>
+    <div class="fg"><label class="fl">Fecha <span class="req">*</span></label><input type="date" id="mnt_fecha"></div>
+  </div>
+  <div class="fg"><label class="fl">Tipo <span class="req">*</span></label><select id="mnt_tipo"><option value="">Seleccionar...</option><option>Mantenimiento preventivo</option><option>Mantenimiento correctivo</option><option>Limpieza de óptica</option><option>Calibración de cabezal</option><option>Cambio de consumibles</option><option>Revisión de gases</option><option>Actualización de software</option><option>Instalación de repuesto</option><option>Visita técnica diagnóstico</option><option>Otro</option></select></div>
+  <div class="fg"><label class="fl">Máquina</label><input type="text" id="mnt_maq" placeholder="Ej: Bodor BCL 1530E"></div>
+  <div class="fg"><label class="fl">Descripción</label><textarea id="mnt_desc" placeholder="Detalle de lo realizado..."></textarea></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Próximo mantenimiento</label><input type="date" id="mnt_prox"></div>
+    <div class="fg"><label class="fl">Técnico</label><input type="text" id="mnt_tec" placeholder="Nombre"></div>
+  </div>
+  <div class="fg"><label class="fl">Costo (S/.)</label><input type="number" id="mnt_costo" placeholder="0.00" step="0.01"></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mMNT')">Cancelar</button>
+    <button class="btn success" onclick="saveMant()"><i class="ti ti-check"></i> Guardar</button>
+  </div>
+</div></div>
+
+<!-- Recordatorio -->
+<div class="mbg" id="mREC"><div class="mod" style="max-width:460px">
+  <div class="mtt"><div class="l"><i class="ti ti-bell"></i> Nuevo recordatorio</div><button class="btn icon ghost" onclick="closeModal('mREC')"><i class="ti ti-x"></i></button></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cliente <span class="req">*</span></label><select id="rec_cli"><option value="">Seleccionar...</option></select></div>
+    <div class="fg"><label class="fl">Fecha límite <span class="req">*</span></label><input type="date" id="rec_fecha"></div>
+  </div>
+  <div class="fg"><label class="fl">Tipo de alerta</label><select id="rec_tipo"><option>Mantenimiento preventivo</option><option>Cambio de consumibles</option><option>Renovación de contrato</option><option>Revisión de garantía</option><option>Llamada de seguimiento</option><option>Visita técnica programada</option><option>Otro</option></select></div>
+  <div class="fg"><label class="fl">Descripción</label><textarea id="rec_desc" placeholder="Detalles..." style="min-height:70px"></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mREC')">Cancelar</button>
+    <button class="btn amber" onclick="saveRec()"><i class="ti ti-bell"></i> Guardar</button>
+  </div>
+</div></div>
+
+<!-- Repuesto -->
+<div class="mbg" id="mREP"><div class="mod" style="max-width:500px">
+  <div class="mtt"><div class="l"><i class="ti ti-package"></i> Registrar repuesto</div><button class="btn icon ghost" onclick="closeModal('mREP')"><i class="ti ti-x"></i></button></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cliente <span class="req">*</span></label><select id="rep_cli"><option value="">Seleccionar...</option></select></div>
+    <div class="fg"><label class="fl">Fecha <span class="req">*</span></label><input type="date" id="rep_fecha"></div>
+  </div>
+  <div class="fg"><label class="fl">Nombre del repuesto <span class="req">*</span></label><input type="text" id="rep_nom" placeholder="Ej: Boquilla doble Ø1.5mm..."></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cantidad</label><input type="number" id="rep_qty" placeholder="1" min="1" value="1"></div>
+    <div class="fg"><label class="fl">Precio unit. (S/.)</label><input type="number" id="rep_precio" placeholder="0.00" step="0.01"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Máquina</label><input type="text" id="rep_maq" placeholder="Bodor BCL 1530E"></div>
+    <div class="fg"><label class="fl">Referencia</label><input type="text" id="rep_ref" placeholder="Ref. fabricante..."></div>
+  </div>
+  <div class="fg"><label class="fl">Observaciones</label><textarea id="rep_obs" placeholder="Motivo del cambio..." style="min-height:60px"></textarea></div>
+  <div class="btn-group" style="justify-content:flex-end;margin-top:6px">
+    <button class="btn" onclick="closeModal('mREP')">Cancelar</button>
+    <button class="btn pur" onclick="saveRep()"><i class="ti ti-check"></i> Registrar</button>
+  </div>
+</div></div>
+
+<script>
+// ═══════════ DATOS TÉCNICOS Y CHECKLISTS ═══════════
+const TDATA={
+  cabezales:['Raytools BM110','Raytools BM114S','Raytools AT130','Raytools BT240S','Precitec ProCutter 2.0','Precitec YW52','Precitec YW30','WSX NC12','WSX W10','WSX NC30','Friendess BM110','Cloudray LightCutter'],
+  fuentes:['IPG Photonics YLS-1000','Raycus RFL-C1000','Raycus RFL-C1500','Raycus RFL-C2000','Raycus RFL-C3000','MAX Photonics MFL-1000','MAX Photonics MFL-2000','nLIGHT Alta 1500W','Trumpf TruFiber','JPT M7 MOPA'],
+  controles:['Cypcut (CypCNC)','Fscut','Beckhoff TwinCAT','PA8000','Mitsubishi M80','Fanuc 0i-MF'],
+  lentes_prot:['D37 x 1.5mm','D37 x 2mm','D37 x 3mm','D37.5 x 2mm','D50 x 2mm','D50 x 3mm','D50 x 4mm'],
+  colimacion:['f=75mm','f=100mm','f=120mm','f=150mm','f=200mm'],
+  enfoque:['f=100mm','f=125mm','f=150mm','f=175mm','f=200mm','f=250mm','f=300mm'],
+  boquillas:['Cilindrica O1.0mm','Cilindrica O1.5mm','Cilindrica O2.0mm','Cilindrica O2.5mm','Doble O1.0mm','Doble O1.5mm','Doble O2.0mm','Doble O2.5mm','Doble O3.0mm','Conica O1.0mm','Conica O1.5mm'],
+  ceramicos:['Raytools O32mm (M14)','Raytools O28mm (M14)','Precitec O28mm','Precitec O32mm','WSX O32mm','Estandar M14x32mm'],
+  materiales:['Acero carbono','Acero inoxidable 304','Acero inoxidable 316','Aluminio','Cobre','Laton','Galvanizado','Titanio','Hierro'],
+  marcas:['Bodor','HSG','LF Laser','Bystronic','Mazak','Trumpf','Amada','ESAB','Fiber Star','Hans Laser','Trotec','Thunder Laser'],
+};
+const CHECKLISTS={
+  laser:{
+    pre:[
+      {sec:'Inspeccion visual del cabezal',items:[
+        {l:'Estado general del cabezal de corte',d:'Sin golpes, fisuras, suciedad externa'},
+        {l:'Lente protectora superior (entrada)',d:'Limpieza, sin manchas ni salpicaduras - D37/D50'},
+        {l:'Lente protectora inferior (salida)',d:'Estado y limpieza - verificar con linterna'},
+        {l:'Lente de colimacion',d:'f=100/120mm - limpieza, centrado, sin fisuras'},
+        {l:'Lente de enfoque',d:'f=150/200mm - limpieza, sin microfisuras'},
+        {l:'Ceramico porta-boquilla',d:'Verificar fisuras, rosca M14, estado electrico'},
+        {l:'Cable del sensor capacitivo',d:'Conexion firme, sin cortes ni dano en aislante'},
+        {l:'Boquilla de corte',d:'Tipo, diametro, desgaste del orificio, concentricidad'},
+        {l:'Conector de fibra optica (QBH)',d:'Limpieza extremo, sin dano, fijacion correcta'},
+      ]},
+      {sec:'Sistema de gases',items:[
+        {l:'Presion de N2 (nitrogeno)',d:'Rango: 12-16 bar - verificar en manometro'},
+        {l:'Presion de O2 (oxigeno)',d:'Rango: 0.5-0.8 bar - verificar en manometro'},
+        {l:'Presion de aire comprimido',d:'Min. 6 bar - pureza y sequedad'},
+        {l:'Fugas en lineas y conexiones',d:'Mangueras, fitting, valvulas solenoides'},
+        {l:'Reguladores de presion',d:'Funcionamiento correcto, sin deformaciones'},
+      ]},
+      {sec:'Fuente laser y electrico',items:[
+        {l:'Voltaje de entrada (L1-L2-L3)',d:'380V +/-5% - medir con multimetro'},
+        {l:'Estado de la fuente laser',d:'Sin alarmas activas, temperatura normal'},
+        {l:'Sistema de refrigeracion (chiller)',d:'Temperatura 20-25C, caudal de agua normal'},
+        {l:'Panel de control y pantalla',d:'Sin errores, botones funcionales'},
+        {l:'Sistema de extraccion de humos',d:'Filtros, turbina, ductos limpios'},
+      ]},
+      {sec:'Mecanica y movimiento',items:[
+        {l:'Guias lineales y cremalleras',d:'Lubricacion, sin holgura ni desgaste'},
+        {l:'Servo motores X, Y, Z',d:'Sin ruidos anormales, respuesta correcta'},
+        {l:'Cama de corte / slats',d:'Estado de las tablillas, alineacion'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion post-intervencion',items:[
+        {l:'Corte de prueba en material del cliente',d:'Sin bava, borde limpio, geometria correcta'},
+        {l:'Verificacion de presiones post-trabajo',d:'N2 y O2 en rango correcto'},
+        {l:'Prueba en diferentes espesores',d:'Verificar parametros de corte'},
+        {l:'Sistema sin alarmas activas',d:'Revisar log de errores'},
+        {l:'Equipo limpio y ordenado',d:'Sin herramientas ni materiales de prueba'},
+        {l:'Cliente informado y conforme',d:'Explicar trabajo realizado y recomendaciones'},
+      ]},
+    ],
+  },
+  co2:{
+    pre:[
+      {sec:'Optica y cabezal CO2',items:[
+        {l:'Tubo laser CO2',d:'Estado, temperatura, potencia nominal'},
+        {l:'Espejo N1 (junto al tubo)',d:'Limpieza, alineacion, sin fisuras - Mo 25mm'},
+        {l:'Espejo N2 (cabezal lateral)',d:'Limpieza, alineacion, estado reflectivo'},
+        {l:'Espejo N3 (cabezal vertical)',d:'Limpieza, alineacion, sin oxidacion'},
+        {l:'Lente focal',d:'2"/2.5" ZnSe - limpieza, sin rayones'},
+        {l:'Boquilla / tobera',d:'Tipo, diametro, estado del orificio'},
+        {l:'Turbo / soplador de asistencia',d:'Funcionamiento, presion de aire'},
+        {l:'Alineacion del haz (beam alignment)',d:'Verificar con papel termico en 4 puntos'},
+      ]},
+      {sec:'Electrico y refrigeracion',items:[
+        {l:'Voltaje de entrada',d:'220V +/-5% monofasico'},
+        {l:'Fuente de poder del tubo',d:'Sin alarmas, tension correcta'},
+        {l:'Refrigeracion del tubo CO2',d:'Flujo de agua adecuado, temperatura'},
+        {l:'Control principal (Ruida/LightBurn)',d:'Comunicacion, sin errores'},
+      ]},
+      {sec:'Mecanica',items:[
+        {l:'Guias y correas',d:'Tension de correa X e Y, lubricacion guias'},
+        {l:'Movimiento X e Y',d:'Sin holgura, movimiento suave'},
+        {l:'Mesa de trabajo',d:'Nivelacion, estado de la parrilla'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion',items:[
+        {l:'Prueba de corte o grabado',d:'Resultado segun material del cliente'},
+        {l:'Alineacion verificada post-trabajo',d:'Haz centrado en boquilla'},
+        {l:'Sistema sin errores',d:'Revisar alarmas y log'},
+        {l:'Equipo limpio y entregado',d:''},
+      ]},
+    ],
+  },
+  plasma:{
+    pre:[
+      {sec:'Antorcha y consumibles',items:[
+        {l:'Electrodo (Electrode)',d:'Desgaste, vida util restante - cambiar si >0.5mm'},
+        {l:'Boquilla / Nozzle',d:'Diametro del orificio, deformacion, quemado'},
+        {l:'Difusor de gas (Swirl Ring)',d:'Canales de gas limpios, sin fisuras'},
+        {l:'Escudo de proteccion (Shield)',d:'Estado, orificio centrado'},
+        {l:'Cuerpo de la antorcha',d:'Sin cortes en cable, conexion firme'},
+        {l:'Distancia de la antorcha (arc gap)',d:'Segun especificacion del fabricante'},
+      ]},
+      {sec:'Sistema de gas y electrico',items:[
+        {l:'Voltaje de entrada',d:'220V / 380V segun equipo'},
+        {l:'Presion de gas de corte',d:'Aire comprimido: 6-7 bar seco y limpio'},
+        {l:'Fuente de plasma',d:'Sin alarmas, amperaje calibrado'},
+        {l:'THC (control de altura)',d:'Calibracion y respuesta correcta'},
+        {l:'Mesa y rieles',d:'Nivelacion, lubricacion'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion',items:[
+        {l:'Corte de prueba',d:'Angularidad, bava, acabado'},
+        {l:'Consumibles revisados post-corte',d:'Vida util restante'},
+        {l:'Sistema sin alarmas',d:''},
+        {l:'Mesa limpia y entregada',d:''},
+      ]},
+    ],
+  },
+  router:{
+    pre:[
+      {sec:'Husillo y herramientas',items:[
+        {l:'Husillo (spindle)',d:'Sin vibracion excesiva, rodamientos, ruido'},
+        {l:'Velocidad del husillo (RPM)',d:'Verificar a velocidad nominal sin oscilacion'},
+        {l:'Collet / porta-herramienta',d:'Estado, limpieza, cierre correcto - ER20/ER32'},
+        {l:'Tuerca del collet (Nut)',d:'Sin desgaste en ranuras, apriete correcto'},
+        {l:'Fresa instalada',d:'Tipo, diametro, geometria, filo'},
+        {l:'Runout de la fresa (TIR)',d:'Max. 0.02mm'},
+      ]},
+      {sec:'Sistema mecanico',items:[
+        {l:'Guias lineales X, Y, Z',d:'Lubricacion, juego axial, limpieza de chips'},
+        {l:'Tornillos de bolas (ballscrews)',d:'Sin juego, lubricacion'},
+        {l:'Sistema de vacio (si aplica)',d:'Sellado de mesa, presion de vacio'},
+        {l:'Sistema de refrigeracion (coolant)',d:'Nivel, concentracion, flujo'},
+      ]},
+      {sec:'Electrico y control',items:[
+        {l:'Voltaje de entrada',d:'220V / 380V segun equipo'},
+        {l:'Drivers de servo',d:'Sin alarmas, temperatura normal'},
+        {l:'Software CAM y controlador',d:'Comunicacion, cero maquina, homes'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion',items:[
+        {l:'Corte de prueba en material',d:'Dimensiones, acabado superficial'},
+        {l:'Perpendicularidad Z',d:'Verificar escuadria'},
+        {l:'Sistema sin alarmas',d:''},
+        {l:'Maquina limpia, chips retirados',d:''},
+        {l:'Cliente informado',d:''},
+      ]},
+    ],
+  },
+  marcado:{
+    pre:[
+      {sec:'Optica galvo',items:[
+        {l:'Lente F-theta',d:'Limpieza, sin aranazos - f=163mm / f=254mm'},
+        {l:'Ventana de proteccion',d:'Limpieza exterior e interior'},
+        {l:'Galvanometros X e Y',d:'Respuesta correcta, sin vibracion'},
+        {l:'Fuente laser (MOPA/Fibra)',d:'Potencia nominal, temperatura, alarmas'},
+        {l:'Fibra optica de entrega',d:'Sin pliegues, conector limpio'},
+      ]},
+      {sec:'Electrico y software',items:[
+        {l:'Voltaje de entrada',d:'220V monofasico'},
+        {l:'Software EzCad/LightBurn',d:'Comunicacion con tarjeta BJJCZ, calibracion'},
+        {l:'Parametros de marcado',d:'Velocidad, potencia, frecuencia segun material'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion',items:[
+        {l:'Prueba de marcado en material del cliente',d:'Contraste, profundidad, definicion'},
+        {l:'Campo de marcado cuadrado',d:'Sin distorsion en bordes'},
+        {l:'Sistema sin alarmas',d:''},
+      ]},
+    ],
+  },
+  otro:{
+    pre:[
+      {sec:'Inspeccion general',items:[
+        {l:'Estado visual del equipo',d:'Carcasa, panel, conexiones'},
+        {l:'Voltaje de alimentacion',d:'Segun especificacion del equipo'},
+        {l:'Sistema de control',d:'Encendido, comunicacion, sin errores'},
+        {l:'Partes moviles',d:'Lubricacion, desgaste, holguras'},
+        {l:'Consumibles / desgastables',d:'Estado y vida util restante'},
+      ]},
+    ],
+    post:[
+      {sec:'Validacion',items:[
+        {l:'Prueba de funcionamiento',d:'Resultado segun especificacion'},
+        {l:'Sin alarmas activas',d:''},
+        {l:'Equipo limpio y entregado',d:''},
+      ]},
+    ],
+  },
+};
+
+// ═══════════ ESTADO GLOBAL ═══════════
+let db=null,auth=null,demoMode=false;
+let clients=[],mantenimientos=[],recordatorios=[],repuestos=[],informes=[];
+let selId=null,curTipo=null,curMqCli=null,curNtCli=null,curInfTipo=null;
+let editClientId=null,editMaqCli=null,editMaqId=null,editInfId=null;
+const BK='tscrm_brand';
+let brandLogo='';
+let curSec='dash';
+let otCounter=0;
+let infPhotos=[];
+
+// ═══════════ BRAND ═══════════
+function loadBrand(){
+  try{
+    const b=JSON.parse(localStorage.getItem(BK)||'{}');
+    if(b.name){['sbname','lco'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=b.name;});document.title=b.name+' - CRM';}
+    if(b.logo){brandLogo=b.logo;applyLogo(b.logo);}
+    ['dir','tel','email','web','eslogan'].forEach(k=>{const el=document.getElementById('br_'+k);if(el&&b[k])el.value=b[k];});
+    if(b.name)document.getElementById('br_n').value=b.name;
+  }catch(e){}
+}
+function applyLogo(src){
+  ['sblogoimg','llimg'].forEach(id=>{const i=document.getElementById(id);if(i){i.src=src;i.style.display='block';}});
+  ['sblogoi','lli'].forEach(id=>{const i=document.getElementById(id);if(i)i.style.display='none';});
+}
+function prevLogo(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>2*1024*1024){toast('warn','Logo no debe superar 2MB.');return;}
+  const r=new FileReader();r.onload=ev=>{brandLogo=ev.target.result;const p=document.getElementById('br_prev');p.src=ev.target.result;p.style.display='block';document.getElementById('br_icon').style.display='none';};r.readAsDataURL(f);
+}
+function saveBrand(){
+  const name=document.getElementById('br_n').value.trim()||'V&J Electronics';
+  ['sbname','lco'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=name;});
+  document.title=name+' - CRM';
+  const data={name,dir:gf('br_dir'),tel:gf('br_tel'),email:gf('br_email'),web:gf('br_web'),eslogan:gf('br_eslogan')};
+  if(brandLogo){data.logo=brandLogo;applyLogo(brandLogo);}
+  localStorage.setItem(BK,JSON.stringify(data));
+  closeModal('mBrand');toast('ok','Empresa actualizada.');
+}
+function getBrand(){try{return JSON.parse(localStorage.getItem(BK)||'{}');}catch(e){return{};}}
+
+// ═══════════ FIREBASE AUTH ═══════════
+function openCfg(){
+  const s=localStorage.getItem('tscrm_fbcfg');
+  if(s&&s!=='demo'){try{const c=JSON.parse(s);['apiKey','projectId','authDomain','storageBucket'].forEach(k=>{const el=document.getElementById('cfg_'+k);if(el)el.value=c[k]||'';});document.getElementById('cfg_msgId').value=c.messagingSenderId||'';document.getElementById('cfg_appId').value=c.appId||'';}catch(e){}}
+  document.getElementById('mCFG').classList.add('open');
+}
+function initFirebase(){
+  const cfg={apiKey:gf('cfg_apiKey'),projectId:gf('cfg_projectId'),authDomain:gf('cfg_authDomain'),storageBucket:gf('cfg_storageBucket'),messagingSenderId:gf('cfg_msgId'),appId:gf('cfg_appId')};
+  if(!cfg.apiKey||!cfg.projectId){toast('err','Completa API Key y Project ID.');return;}
+  try{
+    if(firebase.apps.length)firebase.apps[0].delete();
+    const app=firebase.initializeApp(cfg);db=firebase.firestore(app);auth=firebase.auth(app);
+    demoMode=false;localStorage.setItem('tscrm_fbcfg',JSON.stringify(cfg));
+    closeModal('mCFG');setupAuth();toast('ok','Firebase conectado correctamente.');
+  }catch(e){toast('err','Error: '+e.message);}
+}
+function useDemoMode(){demoMode=true;localStorage.setItem('tscrm_fbcfg','demo');closeModal('mCFG');showApp();toast('warn','Modo local - sin sincronizacion.');}
+function setupAuth(){auth.onAuthStateChanged(u=>{if(u){document.getElementById('uemail').textContent=u.email;showApp();}else{showLogin();}});}
+function showLogin(){document.getElementById('loginScreen').style.display='flex';document.getElementById('appShell').style.display='none';}
+function showApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('appShell').style.display='flex';loadAll();}
+async function doLogin(){
+  const email=gf('li_e'),pass=document.getElementById('li_p').value;
+  if(!email||!pass){showLErr('Completa correo y contrasena.');return;}
+  const btn=document.getElementById('lbtn');btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Ingresando...';btn.disabled=true;
+  document.getElementById('lerr').classList.remove('show');
+  try{await auth.signInWithEmailAndPassword(email,pass);}
+  catch(e){
+    const m={'auth/user-not-found':'Usuario no encontrado.','auth/wrong-password':'Contrasena incorrecta.','auth/invalid-email':'Correo invalido.','auth/too-many-requests':'Demasiados intentos. Espera unos minutos.','auth/invalid-credential':'Correo o contrasena incorrectos.'};
+    showLErr(m[e.code]||'Error: '+e.message);btn.innerHTML='<i class="ti ti-login"></i> Ingresar';btn.disabled=false;
+  }
+}
+function showLErr(msg){document.getElementById('lerrtxt').textContent=msg;document.getElementById('lerr').classList.add('show');}
+async function doLogout(){if(!confirm('Cerrar sesion?'))return;if(auth)await auth.signOut();else showLogin();}
+function togglePass(){const i=document.getElementById('li_p'),b=document.getElementById('tpb');if(i.type==='password'){i.type='text';b.innerHTML='<i class="ti ti-eye-off"></i>';}else{i.type='password';b.innerHTML='<i class="ti ti-eye"></i>';}}
+
+window.addEventListener('load',()=>{
+  loadBrand();
+  const s=localStorage.getItem('tscrm_fbcfg');
+  if(!s){document.getElementById('loginScreen').style.display='none';document.getElementById('mCFG').classList.add('open');return;}
+  if(s==='demo'){demoMode=true;showApp();return;}
+  try{const cfg=JSON.parse(s);const app=firebase.initializeApp(cfg);db=firebase.firestore(app);auth=firebase.auth(app);setupAuth();}
+  catch(e){localStorage.removeItem('tscrm_fbcfg');document.getElementById('loginScreen').style.display='none';document.getElementById('mCFG').classList.add('open');}
+});
+
+// ═══════════ FIRESTORE OPS ═══════════
+async function fsAdd(col,data){
+  if(demoMode){const id=uid();const arr=getLA(col);arr.unshift({id,...data});saveLA(col,arr);return id;}
+  const r=await db.collection(col).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});return r.id;
+}
+async function fsUpdate(col,id,data){
+  if(demoMode){const arr=getLA(col);const i=arr.findIndex(x=>x.id===id);if(i>=0)arr[i]={...arr[i],...data};saveLA(col,arr);return;}
+  await db.collection(col).doc(id).update({...data,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+}
+async function fsDelete(col,id){
+  if(demoMode){saveLA(col,getLA(col).filter(x=>x.id!==id));return;}
+  await db.collection(col).doc(id).delete();
+}
+function getLA(col){try{return JSON.parse(localStorage.getItem('tscrm_'+col)||'[]');}catch(e){return[];}}
+function saveLA(col,arr){try{localStorage.setItem('tscrm_'+col,JSON.stringify(arr));}catch(e){}}
+
+// ═══════════ LOAD ALL ═══════════
+function loadAll(){
+  if(demoMode){
+    clients=getLA('clients');if(!clients.length)clients=sampleClients();
+    mantenimientos=getLA('mantenimientos');recordatorios=getLA('recordatorios');repuestos=getLA('repuestos');informes=getLA('informes');
+    setSyncState('err','Local - sin nube');afterLoad();
+  }else{
+    setSyncState('sync','Conectando...');
+    db.collection('clients').orderBy('createdAt','desc').onSnapshot(s=>{clients=s.docs.map(d=>({id:d.id,...d.data()}));afterLoad();setSyncState('ok','Sincronizado');});
+    db.collection('mantenimientos').orderBy('fecha','desc').onSnapshot(s=>{mantenimientos=s.docs.map(d=>({id:d.id,...d.data()}));renderMants();renderDash();});
+    db.collection('recordatorios').orderBy('fecha','asc').onSnapshot(s=>{recordatorios=s.docs.map(d=>({id:d.id,...d.data()}));renderRecs();renderDash();});
+    db.collection('repuestos').orderBy('fecha','desc').onSnapshot(s=>{repuestos=s.docs.map(d=>({id:d.id,...d.data()}));renderReps();renderDash();});
+    db.collection('informes').orderBy('fecha','desc').onSnapshot(s=>{informes=s.docs.map(d=>({id:d.id,...d.data()}));renderInfs();renderDash();document.getElementById('ninf').textContent=informes.length;});
+  }
+}
+function afterLoad(){
+  document.getElementById('lgrid').style.display='none';document.getElementById('cg').style.display='';
+  document.getElementById('nc').textContent=clients.length;
+  document.getElementById('ninf').textContent=informes.length;
+  renderGrid(clients);renderDash();renderMants();renderRecs();renderReps();renderInfs();fillSelects();
+}
+
+// ═══════════ NAVEGACION ═══════════
+const SECS={dash:{icon:'ti-chart-bar',label:'Dashboard'},clients:{icon:'ti-users',label:'Clientes'},detail:{icon:'ti-user',label:'Detalle cliente'},informes:{icon:'ti-clipboard-list',label:'Informes'},mant:{icon:'ti-tool',label:'Mantenimientos'},recs:{icon:'ti-bell',label:'Recordatorios'},reps:{icon:'ti-package',label:'Repuestos'}};
+function goSec(s){
+  curSec=s;
+  Object.keys(SECS).forEach(k=>{const el=document.getElementById('sec-'+k);if(el)el.style.display=k===s?'':'none';});
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const ni=document.getElementById('ni-'+s);if(ni)ni.classList.add('active');
+  const info=SECS[s]||{icon:'ti-home',label:s};
+  document.getElementById('tbtitle').innerHTML=`<i class="ti ${info.icon}"></i> ${info.label}`;
+  document.getElementById('swrap').style.display=s==='clients'?'':'none';
+  document.getElementById('btnNew').style.display=s==='clients'?'':'none';
+  document.getElementById('btnInf').style.display=s==='informes'?'':'none';
+  closeSB();
+}
+function backClients(){selId=null;goSec('clients');filterClients();}
+function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sov').classList.add('open');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sov').classList.remove('open');}
+function fabAction(){const acts={clients:()=>openModal('nc'),informes:()=>openModal('inf',null),mant:()=>openModal('mnt',null),recs:()=>openModal('rec',null),reps:()=>openModal('rep',null),dash:()=>openModal('nc')};(acts[curSec]||acts.dash)();}
+
+// ═══════════ DASHBOARD ═══════════
+function renderDash(){
+  const totalMaq=clients.reduce((a,c)=>a+(c.maquinas||[]).length,0);
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const venc=recordatorios.filter(r=>{const d=new Date(r.fecha+'T12:00:00');d.setHours(0,0,0,0);return d<hoy;}).length;
+  const ingTotal=mantenimientos.reduce((a,m)=>a+(parseFloat(m.costo)||0),0);
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-icon si-blue"><i class="ti ti-users"></i></div><div><div class="stat-val">${clients.length}</div><div class="stat-lbl">Clientes</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-amber"><i class="ti ti-cpu"></i></div><div><div class="stat-val">${totalMaq}</div><div class="stat-lbl">Maquinas</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-pur"><i class="ti ti-clipboard-list"></i></div><div><div class="stat-val">${informes.length}</div><div class="stat-lbl">Informes</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-green"><i class="ti ti-tool"></i></div><div><div class="stat-val">${mantenimientos.length}</div><div class="stat-lbl">Mantenimientos</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-red"><i class="ti ti-bell"></i></div><div><div class="stat-val">${venc}</div><div class="stat-lbl">Alertas vencidas</div></div></div>
+    <div class="stat-card"><div class="stat-icon si-green"><i class="ti ti-currency-dollar"></i></div><div><div class="stat-val">S/${ingTotal.toFixed(0)}</div><div class="stat-lbl">Ingresos total</div></div></div>`;
+  const prx=recordatorios.filter(r=>new Date(r.fecha+'T12:00:00')>=hoy).slice(0,5);
+  document.getElementById('dashRecs').innerHTML=prx.length?prx.map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:var(--bdr);font-size:12px"><i class="ti ti-bell" style="color:var(--c2);font-size:14px;flex-shrink:0"></i><div style="flex:1;min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.clienteName||'')}</div><div style="color:var(--text2)">${esc(r.tipo||'')} - ${fmtDate(r.fecha)}</div></div></div>`).join(''):'<div style="font-size:12px;color:var(--text2);padding:8px 0">Sin recordatorios proximos.</div>';
+  const lastInfs=informes.slice(0,5);
+  document.getElementById('dashInfs').innerHTML=lastInfs.length?lastInfs.map(i=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:var(--bdr);font-size:12px"><i class="ti ti-clipboard-list" style="color:var(--pur);font-size:14px;flex-shrink:0"></i><div style="flex:1;min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.clienteName||'')} - ${esc(i.tipoServicio||'')}</div><div style="color:var(--text2)">${esc(i.ot||'')} - ${fmtDate(i.fecha)}</div></div><button class="btn sm ghost" onclick="genPDF('${i.id}')" title="PDF"><i class="ti ti-file-type-pdf" style="color:var(--red)"></i></button></div>`).join(''):'<div style="font-size:12px;color:var(--text2);padding:8px 0">Sin informes aun.</div>';
+  const nb=document.getElementById('nrec');if(venc>0){nb.textContent=venc;nb.style.display='';}else nb.style.display='none';
+}
+
+// ═══════════ CLIENTES ═══════════
+function filterClients(){
+  const q=document.getElementById('si').value.toLowerCase().trim();
+  renderGrid(q?clients.filter(c=>c.name.toLowerCase().includes(q)||(c.ruc&&c.ruc.includes(q))||(c.contacto&&c.contacto.toLowerCase().includes(q))):clients);
+}
+function renderGrid(list){
+  const g=document.getElementById('cg'),e=document.getElementById('nores');
+  if(!list.length){g.style.display='none';e.style.display='';return;}
+  e.style.display='none';g.style.display='';
+  g.innerHTML=list.map(c=>`
+    <div class="ccard${selId===c.id?' sel':''}" onclick="selClient('${c.id}')">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="av">${ini(c.name)}</div>
+        <div style="min-width:0"><div style="font-weight:600;font-size:14px">${esc(c.name)}</div><div style="font-size:12px;color:var(--text2)">${c.tipo==='empresa'?'Empresa':'Persona'}${c.ruc?' - '+c.ruc:''}</div></div>
+      </div>
+      ${c.dir?`<div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-bottom:4px"><i class="ti ti-map-pin" style="font-size:11px"></i>${esc(c.dir)}</div>`:''}
+      ${c.tel?`<div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-bottom:6px"><i class="ti ti-phone" style="font-size:11px"></i>${esc(c.tel)}</div>`:''}
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${(c.maquinas||[]).length?`<span class="badge b-blue"><i class="ti ti-cpu"></i>${c.maquinas.length} maq.</span>`:''}
+        ${infCount(c.id)?`<span class="badge b-pur"><i class="ti ti-clipboard-list"></i>${infCount(c.id)} inf.</span>`:''}
+        ${mantCount(c.id)?`<span class="badge b-green"><i class="ti ti-tool"></i>${mantCount(c.id)}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+function mantCount(cid){return mantenimientos.filter(m=>m.clienteId===cid).length;}
+function infCount(cid){return informes.filter(i=>i.clienteId===cid).length;}
+
+// ═══════════ DETALLE ═══════════
+function selClient(id){selId=id;const c=clients.find(x=>x.id===id);if(!c)return;renderDetail(c);goSec('detail');filterClients();}
+function spI(lbl,val){if(!val)return'';return`<div class="spec"><div class="spec-v">${esc(val)}</div><div class="spec-l">${lbl}</div></div>`;}
+function renderMaqCard(m,cliId){
+  const icMap={laser:'mi-laser ti-bolt',co2:'mi-co2 ti-wave-sine',marcado:'mi-marcado ti-tag',plasma:'mi-plasma ti-flame',router:'mi-router ti-settings',otro:'mi-otro ti-tool'};
+  const ic=(icMap[m.tipo]||'mi-otro ti-tool').split(' ');
+  let body='';
+  if(m.tipo==='laser')body=`<div class="sfh"><i class="ti ti-bolt"></i> Fuente laser</div><div class="specs">${spI('Marca fuente',m.fuente)}${spI('Potencia',m.fuente_pot)}${spI('Voltaje',m.voltaje)}${spI('Area',m.area)}${spI('Control CNC',m.control)}${spI('Refrigeracion',m.refrigeracion)}</div><div class="sfh"><i class="ti ti-eye"></i> Cabezal de corte</div><div class="specs">${spI('Cabezal',m.cabezal)}${spI('Pot. cabezal',m.cabezal_pot)}${spI('Colimacion',m.colimacion)}${spI('Enfoque',m.enfoque)}${spI('Lente prot. sup.',m.lente_prot)}${spI('Lente prot. inf.',m.lente_prot_inf)}${spI('Ceramico',m.ceramico)}${spI('Cable sensor cap.',m.cable_sensor)}${spI('Boquilla uso',m.boquilla_uso)}${spI('Stock boquillas',m.boquilla_stock)}</div><div class="sfh"><i class="ti ti-wind"></i> Gases</div><div class="specs">${spI('Gases',m.gas_asistencia)}${spI('Presion N2',m.presion_n2)}${spI('Presion O2',m.presion_o2)}</div><div class="sfh"><i class="ti ti-layers"></i> Materiales</div><div class="specs">${spI('Materiales',m.materiales)}${spI('Consumibles',m.consumibles)}</div>`;
+  else if(m.tipo==='co2')body=`<div class="specs">${spI('Voltaje',m.voltaje)}${spI('Potencia tubo',m.fuente_pot)}${spI('Area',m.area)}${spI('Lente focal',m.lente_focal)}${spI('Boquilla',m.boquilla)}${spI('Espejo 1',m.espejo1)}${spI('Espejo 2',m.espejo2)}${spI('Espejo 3',m.espejo3)}${spI('Turbo/Soplador',m.turbo)}${spI('Control',m.control)}${spI('Consumibles',m.consumibles)}</div>`;
+  else if(m.tipo==='marcado')body=`<div class="specs">${spI('Potencia',m.fuente_pot)}${spI('Long. onda',m.longonda)}${spI('Area',m.area)}${spI('F-theta',m.fteta)}${spI('Ventana prot.',m.ventana_prot)}${spI('Galvo',m.galvo)}${spI('Software',m.control)}</div>`;
+  else if(m.tipo==='plasma')body=`<div class="specs">${spI('Voltaje',m.voltaje)}${spI('Amperaje',m.fuente_pot)}${spI('Area',m.area)}${spI('THC',m.thc)}${spI('Electrodo',m.electrodo)}${spI('Nozzle',m.nozzle)}${spI('Shield',m.shield)}${spI('Consumibles',m.consumibles)}</div>`;
+  else if(m.tipo==='router')body=`<div class="specs">${spI('Voltaje',m.voltaje)}${spI('Potencia husillo',m.fuente_pot)}${spI('RPM',m.rpm)}${spI('Area',m.area)}${spI('Collet',m.collet)}${spI('Tuerca (Nut)',m.nut)}${spI('Fresa',m.fresa)}${spI('Software CAM',m.control)}</div>`;
+  else body=`<div class="specs">${spI('Voltaje',m.voltaje)}${spI('Potencia',m.fuente_pot)}${spI('Consumibles',m.consumibles)}</div>`;
+  return`<div class="mc"><div class="mc-head" onclick="togMaq(this)">
+    <div class="mc-icon ${ic[0]}"><i class="ti ${ic[1]}"></i></div>
+    <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((m.marca||'')+' '+(m.modelo||''))}</div><div style="font-size:10px;color:var(--text2);margin-top:1px">${tLabel(m.tipo)}${m.serie?' - S/N: '+m.serie:''}</div></div>
+    <span class="ttag t-${m.tipo}">${tLabel(m.tipo)}</span>
+    <button class="btn icon sm" onclick="event.stopPropagation();openModal('mqEdit',{cli:'${cliId}',maq:'${m.id}'})" title="Editar maquina" style="padding:5px"><i class="ti ti-pencil" style="font-size:13px"></i></button>
+    <button class="btn icon sm danger" onclick="event.stopPropagation();deleteMachine('${cliId}','${m.id}')" title="Eliminar maquina" style="padding:5px"><i class="ti ti-trash" style="font-size:13px"></i></button>
+    <i class="ti ti-chevron-down mc-chev"></i></div>
+    <div class="mc-body">${body}${m.notas?`<div class="maq-note"><i class="ti ti-notes"></i><span>${esc(m.notas)}</span></div>`:''}</div></div>`;
+}
+function togMaq(h){h.querySelector('.mc-chev').classList.toggle('open');h.nextElementSibling.classList.toggle('open');}
+
+function renderDetail(c){
+  const cInfs=informes.filter(i=>i.clienteId===c.id);
+  document.getElementById('dside').innerHTML=`
+    <div class="cbox">
+      <div style="text-align:center;padding-bottom:12px;border-bottom:var(--bdr);margin-bottom:12px">
+        <div class="av" style="width:48px;height:48px;font-size:16px;border-radius:12px;margin:0 auto 10px">${ini(c.name)}</div>
+        <div style="font-weight:700;font-size:14px">${esc(c.name)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${c.tipo==='empresa'?'Empresa':'Persona natural'}${c.ruc?' - RUC '+c.ruc:''}</div>
+      </div>
+      <div class="cbt"><i class="ti ti-id-badge"></i> Contacto</div>
+      ${c.dir?`<div class="irow"><i class="ti ti-map-pin"></i><div><div class="ilbl">Direccion</div><div class="ival">${esc(c.dir)}</div></div></div>`:''}
+      ${c.tel?`<div class="irow"><i class="ti ti-phone"></i><div><div class="ilbl">Telefono</div><div class="ival">${esc(c.tel)}</div></div></div>`:''}
+      ${c.email?`<div class="irow"><i class="ti ti-mail"></i><div><div class="ilbl">Correo</div><div class="ival">${esc(c.email)}</div></div></div>`:''}
+      ${c.contacto?`<div class="irow"><i class="ti ti-user"></i><div><div class="ilbl">Contacto</div><div class="ival">${esc(c.contacto)}</div></div></div>`:''}
+    </div>
+    <div class="btn-group" style="flex-direction:column">
+      <button class="btn success" onclick="openInfForClient('${c.id}')"><i class="ti ti-clipboard-list"></i> Nuevo informe</button>
+      <button class="btn primary" onclick="openModal('mq','${c.id}')"><i class="ti ti-plus"></i> Agregar maquina</button>
+      <button class="btn amber" onclick="openRecForClient('${c.id}')"><i class="ti ti-bell"></i> Recordatorio</button>
+      <button class="btn pur" onclick="openRepForClient('${c.id}')"><i class="ti ti-package"></i> Repuesto</button>
+      <button class="btn ghost" onclick="openModal('nt','${c.id}')"><i class="ti ti-notes"></i> Nota</button>
+      <button class="btn ghost" onclick="openModal('ncEdit','${c.id}')"><i class="ti ti-pencil"></i> Editar datos del cliente</button>
+      <button class="btn danger" onclick="delClient('${c.id}')"><i class="ti ti-trash"></i> Eliminar cliente</button>
+    </div>`;
+  const maqH=(c.maquinas||[]).map(m=>renderMaqCard(m,c.id)).join('')||'<div style="font-size:12px;color:var(--text2)">Sin maquinas.</div>';
+  const infH=cInfs.slice(0,5).map(i=>`<div class="mnt-item"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;margin-bottom:4px"><span style="font-weight:600;font-size:12px">${esc(i.tipoServicio||'')} - ${esc(i.ot||'')}</span><div class="btn-group"><button class="btn sm ghost" onclick="openModal('infEdit','${i.id}')" style="padding:3px 7px"><i class="ti ti-pencil"></i></button><button class="btn sm ghost" onclick="genPDF('${i.id}')" style="padding:3px 7px"><i class="ti ti-file-type-pdf" style="color:var(--red)"></i></button><button class="btn sm danger" onclick="delInf('${i.id}')" style="padding:3px 7px"><i class="ti ti-trash"></i></button></div></div><div style="font-size:11px;color:var(--text2)">${fmtDate(i.fecha)}${i.maquinaNombre?' - '+esc(i.maquinaNombre):''}${i.resultado?' - '+esc(i.resultado):''}</div></div>`).join('')||'<div style="font-size:12px;color:var(--text2)">Sin informes.</div>';
+  const ntH=(c.notas||[]).slice().reverse().map(n=>`<div class="note-item">${esc(n.text)}<div class="note-date"><i class="ti ti-calendar"></i>${n.date}</div></div>`).join('')||'<div style="font-size:12px;color:var(--text2)">Sin notas.</div>';
+  document.getElementById('dmain').innerHTML=`
+    <div class="sh2"><i class="ti ti-cpu"></i><span>Maquinas (${(c.maquinas||[]).length})</span><div class="sh2-line"></div></div>${maqH}
+    <div class="sh2" style="margin-top:16px"><i class="ti ti-clipboard-list"></i><span>Informes (${cInfs.length})</span><div class="sh2-line"></div></div>${infH}
+    <div class="sh2" style="margin-top:16px"><i class="ti ti-notes"></i><span>Notas</span><div class="sh2-line"></div></div>${ntH}`;
+}
+
+// ═══════════ INFORMES / MANT / RECS / REPS RENDER ═══════════
+function renderInfs(){
+  const el=document.getElementById('infList');if(!el)return;
+  if(!informes.length){el.innerHTML='<div class="empty"><i class="ti ti-clipboard-list ei"></i><h3>Sin informes</h3><p>Genera el primer informe de servicio.</p></div>';return;}
+  el.innerHTML=informes.map(i=>`
+    <div class="mnt-item">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px">
+        <span style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px"><i class="ti ti-clipboard-list" style="color:var(--pur)"></i>${esc(i.ot||'Sin OT')} - ${esc(i.tipoServicio||'')}</span>
+        <div class="btn-group"><button class="btn sm" onclick="openModal('infEdit','${i.id}')"><i class="ti ti-pencil"></i> Editar</button><button class="btn sm" onclick="genPDF('${i.id}')" style="color:var(--red)"><i class="ti ti-file-type-pdf"></i> PDF</button><button class="btn sm danger" onclick="delInf('${i.id}')"><i class="ti ti-trash"></i></button></div>
+      </div>
+      <div style="font-size:12px;color:var(--c1);font-weight:500;margin-bottom:3px">${esc(i.clienteName||'')}</div>
+      <div style="font-size:12px;color:var(--text2)">${fmtDate(i.fecha)}${i.maquinaNombre?' - '+esc(i.maquinaNombre):''}${i.tecnico?' - Tec: '+esc(i.tecnico):''}</div>
+      ${i.resultado?`<div style="font-size:11px;margin-top:4px;font-weight:600;color:${i.resultado==='Satisfactorio'?'var(--ok)':i.resultado==='Parcial'?'var(--c2)':'var(--red)'}">${i.resultado==='Satisfactorio'?'OK':'!'} ${esc(i.resultado)}</div>`:''}
+    </div>`).join('');
+}
+function renderMants(){
+  const el=document.getElementById('mantList');if(!el)return;
+  if(!mantenimientos.length){el.innerHTML='<div class="empty"><i class="ti ti-tool ei"></i><h3>Sin mantenimientos</h3><p>Registra el primer mantenimiento.</p></div>';return;}
+  el.innerHTML=mantenimientos.map(m=>`
+    <div class="mnt-item">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;margin-bottom:4px">
+        <span style="font-weight:600;font-size:12px"><i class="ti ti-tool" style="color:var(--ok);margin-right:4px"></i>${esc(m.tipo||'')}</span>
+        <div style="display:flex;align-items:center;gap:8px">${m.costo?`<span style="font-weight:700;color:var(--ok);font-size:12px">S/ ${parseFloat(m.costo).toFixed(2)}</span>`:''}<span style="font-size:11px;color:var(--text3)">${fmtDate(m.fecha)}</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--c1);font-weight:500;margin-bottom:3px">${esc(m.clienteName||'')}</div>
+      ${m.maquina?`<div style="font-size:11px;color:var(--text2);margin-bottom:3px">${esc(m.maquina)}</div>`:''}
+      ${m.desc?`<div style="font-size:12px;color:var(--text2)">${esc(m.desc)}</div>`:''}
+      ${m.proximoMant?`<div style="font-size:11px;color:var(--c2);margin-top:4px;font-weight:600"><i class="ti ti-calendar-due"></i> Proximo: ${fmtDate(m.proximoMant)}</div>`:''}
+    </div>`).join('');
+}
+function renderRecs(){
+  const el=document.getElementById('recList');if(!el)return;
+  if(!recordatorios.length){el.innerHTML='<div class="empty"><i class="ti ti-bell ei"></i><h3>Sin recordatorios</h3><p>Agrega alertas de mantenimiento.</p></div>';return;}
+  const sorted=[...recordatorios].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  el.innerHTML=sorted.map(r=>{
+    const d=diasR(r.fecha);
+    const cls=d<0?'vencido':d<=3?'hoy':d<=14?'proximo':'';
+    const icCls=d<0?'ri-red':d<=3?'ri-amber':d<=14?'ri-green':'ri-blue';
+    const icN=d<0?'ti-alert-circle':d<=3?'ti-clock':d<=14?'ti-bell':'ti-calendar';
+    const dStr=d<0?`<span style="color:var(--red);font-weight:700">Vencido hace ${Math.abs(d)}d</span>`:d===0?`<span style="color:var(--c2);font-weight:700">Hoy!</span>`:`<span style="color:var(--ok);font-weight:600">En ${d} dia${d>1?'s':''} - ${fmtDate(r.fecha)}</span>`;
+    return`<div class="rec-item ${cls}">
+      <div class="ri-icon ${icCls}"><i class="ti ${icN}"></i></div>
+      <div style="flex:1"><div style="font-weight:600;font-size:12px">${esc(r.tipo||'')}</div><div style="font-size:11px;color:var(--text2);margin-top:1px">${esc(r.clienteName||'')}</div>${r.desc?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(r.desc)}</div>`:''}<div style="font-size:11px;margin-top:4px">${dStr}</div></div>
+      <button class="btn danger sm icon" onclick="delRec('${r.id}')"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+function renderReps(){
+  const el=document.getElementById('repList');if(!el)return;
+  if(!repuestos.length){el.innerHTML='<div class="empty"><i class="ti ti-package ei"></i><h3>Sin repuestos</h3><p>Registra los repuestos vendidos o instalados.</p></div>';return;}
+  const total=repuestos.reduce((a,r)=>a+(parseFloat(r.precio||0)*parseInt(r.qty||1)),0);
+  el.innerHTML=`<div style="background:var(--okl);color:var(--okt);border-radius:var(--r);padding:9px 14px;margin-bottom:10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-currency-dollar"></i> Total en repuestos: S/ ${total.toFixed(2)}</div>`+
+  repuestos.map(r=>`
+    <div class="rep-item">
+      <div class="rep-icon"><i class="ti ti-package"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${esc(r.nombre||'')}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px"><span style="color:var(--c1);font-weight:600">${esc(r.clienteName||'')}</span> - ${fmtDate(r.fecha)} - Qty: ${r.qty||1}${r.maquina?' - '+esc(r.maquina):''}${r.ref?' - Ref: '+esc(r.ref):''}</div>
+        ${r.obs?`<div style="font-size:10px;color:var(--text3);margin-top:1px">${esc(r.obs)}</div>`:''}
+      </div>
+      ${r.precio?`<div style="text-align:right"><div style="font-weight:700;color:var(--ok);font-size:13px">S/${(parseFloat(r.precio)*parseInt(r.qty||1)).toFixed(2)}</div><div style="font-size:10px;color:var(--text3)">${r.qty||1}xS/${parseFloat(r.precio).toFixed(2)}</div></div>`:''}
+    </div>`).join('');
+}
+
+// ═══════════ MODALES ═══════════
+function openModal(type,id){
+  if(type==='nc'){editClientId=null;['nc_n','nc_r','nc_d','nc_p','nc_e','nc_c','nc_no'].forEach(x=>{const e=document.getElementById(x);if(e)e.value='';});document.getElementById('nc_t').value='empresa';document.getElementById('nc_sg').style.display='none';document.getElementById('mNC').querySelector('.mtt .l').innerHTML='<i class="ti ti-user-plus"></i> Nuevo cliente';document.getElementById('mNC').classList.add('open');setTimeout(()=>document.getElementById('nc_n').focus(),120);}
+  else if(type==='ncEdit'){
+    const c=clients.find(x=>x.id===id);if(!c)return;
+    editClientId=id;
+    document.getElementById('nc_n').value=c.name||'';
+    document.getElementById('nc_r').value=c.ruc||'';
+    document.getElementById('nc_t').value=c.tipo||'empresa';
+    document.getElementById('nc_d').value=c.dir||'';
+    document.getElementById('nc_p').value=c.tel||'';
+    document.getElementById('nc_e').value=c.email||'';
+    document.getElementById('nc_c').value=c.contacto||'';
+    document.getElementById('nc_no').value='';
+    document.getElementById('nc_sg').style.display='none';
+    document.getElementById('mNC').querySelector('.mtt .l').innerHTML='<i class="ti ti-user-edit"></i> Editar cliente';
+    document.getElementById('mNC').classList.add('open');
+  }
+  else if(type==='mq'){editMaqId=null;curMqCli=id;curTipo=null;document.getElementById('mq_campos').innerHTML='';document.getElementById('mq_sg').style.display='none';document.getElementById('mq_notas').value='';document.querySelectorAll('#tChips .chip').forEach(c=>c.className='chip');document.getElementById('mMQ').querySelector('.mtt .l').innerHTML='<i class="ti ti-cpu"></i> Registrar maquina';document.getElementById('mMQ').classList.add('open');}
+  else if(type==='mqEdit'){
+    const cli=clients.find(x=>x.id===id.cli);if(!cli)return;
+    const m=(cli.maquinas||[]).find(x=>x.id===id.maq);if(!m)return;
+    editMaqCli=id.cli;editMaqId=id.maq;curMqCli=id.cli;
+    document.getElementById('mq_sg').style.display='none';
+    document.getElementById('mMQ').querySelector('.mtt .l').innerHTML='<i class="ti ti-cpu"></i> Editar maquina';
+    document.getElementById('mMQ').classList.add('open');
+    const chipEl=document.querySelector('#tChips .chip[data-tipo="'+m.tipo+'"]');
+    if(chipEl)selTipo(m.tipo,chipEl);else selTipo(m.tipo,document.querySelector('#tChips .chip'));
+    setTimeout(()=>{
+      Object.keys(m).forEach(k=>{
+        const el=document.getElementById('mq_'+k);
+        if(el&&k!=='id'&&k!=='tipo')el.value=m[k]||'';
+      });
+      document.getElementById('mq_notas').value=m.notas||'';
+    },50);
+  }
+  else if(type==='nt'){curNtCli=id;document.getElementById('nt_tx').value='';document.getElementById('mNT').classList.add('open');setTimeout(()=>document.getElementById('nt_tx').focus(),120);}
+  else if(type==='inf'){
+    infPhotos=[];curInfTipo=null;editInfId=null;
+    fillSelects();
+    const fields=['inf_req','inf_desde','inf_hall','inf_med','inf_sol','inf_reps','inf_pruebas','inf_diag','inf_causa','inf_obs','inf_obscliente','inf_tec','inf_receptor'];
+    fields.forEach(x=>{const e=document.getElementById(x);if(e)e.value='';});
+    document.getElementById('inf_fecha').value=todayISO();
+    document.getElementById('inf_hi').value='';document.getElementById('inf_hf').value='';document.getElementById('inf_prox').value='';
+    otCounter++;
+    document.getElementById('inf_ot').value='OT-'+new Date().getFullYear()+'-'+String(otCounter).padStart(3,'0');
+    document.getElementById('inf_prev').value='No';document.getElementById('inf_replica').value='Si - se replico exitosamente';
+    document.getElementById('inf_resultado').value='Satisfactorio';
+    document.querySelectorAll('#infTipoChips .chip').forEach(c=>c.className='chip');
+    if(id){document.getElementById('inf_cli').value=id;loadMaqForInf();}
+    document.getElementById('inf_photos_list').innerHTML='';
+    document.getElementById('inf_checklist_container').innerHTML='<div style="font-size:12px;color:var(--text2);padding:6px 0">Selecciona el tipo de servicio y la maquina para ver el checklist.</div>';
+    document.getElementById('mINF').querySelector('.mtt .l').innerHTML='<i class="ti ti-clipboard-list"></i> Informe de Servicio Tecnico';
+    document.getElementById('mINF').classList.add('open');
+  }
+  else if(type==='infEdit'){
+    const inf=informes.find(x=>x.id===id);if(!inf)return;
+    editInfId=id;infPhotos=(inf.fotos||[]).map(p=>({data:p.data,desc:p.desc||''}));
+    fillSelects();
+    document.getElementById('inf_cli').value=inf.clienteId||'';
+    loadMaqForInf();
+    setTimeout(()=>{document.getElementById('inf_maq').value=inf.maquinaId||'';refreshChecklist();
+      setTimeout(()=>{
+        const data={inf_fecha:inf.fecha,inf_ot:inf.ot,inf_hi:inf.horaInicio,inf_hf:inf.horaFin,inf_tec:inf.tecnico,
+          inf_req:inf.requerimiento,inf_desde:inf.desde,inf_prev:inf.previo,
+          inf_hall:inf.hallazgos,inf_med:inf.mediciones,inf_replica:inf.replica,
+          inf_sol:inf.solucion,inf_reps:inf.repuestos,
+          inf_pruebas:inf.pruebas,inf_resultado:inf.resultado,
+          inf_diag:inf.diagnostico,inf_causa:inf.causaRaiz,inf_obs:inf.observaciones,
+          inf_receptor:inf.receptor,inf_prox:inf.proxMantenimiento,inf_obscliente:inf.obsCliente};
+        Object.keys(data).forEach(k=>{const el=document.getElementById(k);if(el&&data[k]!==undefined)el.value=data[k]||'';});
+        document.querySelectorAll('[id^="clb_"]').forEach(b=>{
+          const id2=b.id.replace('clb_','');const lastU=id2.lastIndexOf('_');
+          const keyParts=id2.substring(0,lastU);const val=id2.substring(lastU+1);
+          if(inf.checklist&&inf.checklist[keyParts]===val)setClBtn(b,keyParts,val);
+        });
+        renderPhotosUI();
+      },120);
+    },150);
+    document.querySelectorAll('#infTipoChips .chip').forEach(c=>{
+      c.className='chip';
+      if(c.textContent.trim()===inf.tipoServicio){const cls={'Diagnostico':'s-co2','Preventivo':'s-marcado','Correctivo':'s-plasma','Instalacion':'s-router','Capacitacion':'s-otro'};c.className='chip '+(cls[inf.tipoServicio]||'s-otro');}
+    });
+    curInfTipo=inf.tipoServicio;
+    document.getElementById('mINF').querySelector('.mtt .l').innerHTML='<i class="ti ti-pencil"></i> Editar informe';
+    document.getElementById('mINF').classList.add('open');
+  }
+  else if(type==='mnt'){fillSelects();document.getElementById('mnt_fecha').value=todayISO();['mnt_cli','mnt_tipo','mnt_maq','mnt_desc','mnt_prox','mnt_tec','mnt_costo'].forEach(x=>{const e=document.getElementById(x);if(e&&x!=='mnt_fecha')e.value='';});if(id)document.getElementById('mnt_cli').value=id;document.getElementById('mMNT').classList.add('open');}
+  else if(type==='rec'){fillSelects();document.getElementById('rec_fecha').value='';['rec_cli','rec_tipo','rec_desc'].forEach(x=>{const e=document.getElementById(x);if(e)e.value='';});if(id)document.getElementById('rec_cli').value=id;document.getElementById('mREC').classList.add('open');}
+  else if(type==='rep'){fillSelects();document.getElementById('rep_fecha').value=todayISO();['rep_cli','rep_nom','rep_qty','rep_precio','rep_maq','rep_ref','rep_obs'].forEach(x=>{const e=document.getElementById(x);if(e)e.value=x==='rep_qty'?'1':'';});if(id)document.getElementById('rep_cli').value=id;document.getElementById('mREP').classList.add('open');}
+  else if(type==='brand'){const b=getBrand();document.getElementById('br_n').value=b.name||'';if(b.logo){document.getElementById('br_prev').src=b.logo;document.getElementById('br_prev').style.display='block';document.getElementById('br_icon').style.display='none';}document.getElementById('mBrand').classList.add('open');setTimeout(()=>document.getElementById('br_n').focus(),120);}
+}
+function closeModal(id){const el=document.getElementById(id)||document.getElementById('m'+id);if(el)el.classList.remove('open');if(id==='mNC')editClientId=null;if(id==='mMQ'){editMaqId=null;editMaqCli=null;}if(id==='mINF')editInfId=null;}
+function openInfForClient(id){openModal('inf',id);}
+function openRecForClient(id){openModal('rec',id);}
+function openRepForClient(id){openModal('rep',id);}
+function fillSelects(){
+  const opts=clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  ['mnt_cli','rec_cli','rep_cli','inf_cli'].forEach(id=>{const el=document.getElementById(id);if(el){el.innerHTML='<option value="">Seleccionar cliente...</option>'+opts;}});
+}
+function loadMaqForInf(){
+  const cliId=gf('inf_cli');
+  const cli=clients.find(x=>x.id===cliId);
+  const maqSel=document.getElementById('inf_maq');
+  if(!maqSel)return;
+  maqSel.innerHTML='<option value="">Seleccionar maquina...</option>';
+  if(cli&&(cli.maquinas||[]).length){
+    cli.maquinas.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=(m.marca||'')+' '+(m.modelo||'')+' ('+tLabel(m.tipo)+')';maqSel.appendChild(o);});
+  }
+  refreshChecklist();
+}
+
+['mCFG','mBrand','mNC','mMQ','mNT','mINF','mMNT','mREC','mREP'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',e=>{if(e.target===el)closeModal(id);});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')['mCFG','mBrand','mNC','mMQ','mNT','mINF','mMNT','mREC','mREP'].forEach(closeModal);});
+
+// ═══════════ INFORME - TIPO Y CHECKLIST ═══════════
+function selInfTipo(tipo,el){
+  curInfTipo=tipo;
+  document.querySelectorAll('#infTipoChips .chip').forEach(c=>c.className='chip');
+  const cls={'Diagnostico':'s-co2','Preventivo':'s-marcado','Correctivo':'s-plasma','Instalacion':'s-router','Capacitacion':'s-otro'};
+  el.className='chip '+(cls[tipo]||'s-otro');
+  refreshChecklist();
+}
+function getMaqTipo(){
+  const cliId=gf('inf_cli');const maqId=gf('inf_maq');
+  const cli=clients.find(x=>x.id===cliId);
+  if(!cli)return null;
+  const maq=(cli.maquinas||[]).find(m=>m.id===maqId);
+  return maq?maq.tipo:null;
+}
+function refreshChecklist(){
+  if(!curInfTipo){document.getElementById('inf_checklist_container').innerHTML='<div style="font-size:12px;color:var(--text2);padding:6px 0">Selecciona el tipo de servicio primero.</div>';return;}
+  const maqTipo=getMaqTipo()||'otro';
+  const cl=CHECKLISTS[maqTipo]||CHECKLISTS.otro;
+  const container=document.getElementById('inf_checklist_container');
+  if(!container)return;
+  let html='<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Checklist para <strong>'+tLabel(maqTipo)+'</strong> - Servicio: <strong>'+curInfTipo+'</strong></div>';
+  html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ok);background:var(--okl);padding:5px 10px;border-radius:var(--r);margin-bottom:8px">CHECKLIST PRE - Recepcion del equipo</div>';
+  cl.pre.forEach((sec,si)=>{
+    html+='<div style="background:var(--bg3);border-radius:var(--r);padding:10px;margin-bottom:8px">';
+    html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--c1t);margin-bottom:7px">'+esc(sec.sec)+'</div>';
+    sec.items.forEach((item,ii)=>{
+      const key='cl_pre_'+si+'_'+ii;
+      html+=clItemHTML(key,item);
+    });
+    html+='</div>';
+  });
+  html+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--c1);background:var(--c1l);padding:5px 10px;border-radius:var(--r);margin:10px 0 8px">CHECKLIST POST - Validacion final</div>';
+  cl.post.forEach((sec,si)=>{
+    html+='<div style="background:var(--bg3);border-radius:var(--r);padding:10px;margin-bottom:8px">';
+    html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--c1t);margin-bottom:7px">'+esc(sec.sec)+'</div>';
+    sec.items.forEach((item,ii)=>{
+      const key='cl_post_'+si+'_'+ii;
+      html+=clItemHTML(key,item);
+    });
+    html+='</div>';
+  });
+  container.innerHTML=html;
+}
+function clItemHTML(key,item){
+  return '<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05)" id="clrow_'+key+'">'+
+    '<div style="flex:1"><div style="font-size:12px">'+esc(item.l)+'</div>'+(item.d?'<div style="font-size:10px;color:var(--text3);margin-top:1px">'+esc(item.d)+'</div>':'')+'</div>'+
+    '<div style="display:flex;gap:3px;flex-shrink:0">'+
+    '<button onclick="setClBtn(this,\''+key+'\',\'ok\')" style="padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:var(--okl);color:var(--okt);opacity:.5" id="clb_'+key+'_ok">OK</button>'+
+    '<button onclick="setClBtn(this,\''+key+'\',\'obs\')" style="padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:var(--c2l);color:var(--c2t);opacity:.5" id="clb_'+key+'_obs">OBS</button>'+
+    '<button onclick="setClBtn(this,\''+key+'\',\'fail\')" style="padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:var(--redl);color:#7f1d1d;opacity:.5" id="clb_'+key+'_fail">FALLA</button>'+
+    '<button onclick="setClBtn(this,\''+key+'\',\'na\')" style="padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:var(--bg3);color:var(--text3);opacity:.5" id="clb_'+key+'_na">N/A</button>'+
+    '</div></div>';
+}
+function setClBtn(btn,key,val){
+  ['ok','obs','fail','na'].forEach(v=>{const b=document.getElementById('clb_'+key+'_'+v);if(b)b.style.opacity=v===val?'1':'0.5';});
+  const row=document.getElementById('clrow_'+key);
+  if(row){const colors={ok:'rgba(16,185,129,.06)',obs:'rgba(245,158,11,.06)',fail:'rgba(239,68,68,.06)',na:'transparent'};row.style.background=colors[val]||'transparent';}
+}
+function getChecklistData(){
+  const data={};
+  document.querySelectorAll('[id^="clb_"]').forEach(b=>{
+    if(b.style.opacity==='1'){
+      const id=b.id.replace('clb_','');
+      const lastUnderscore=id.lastIndexOf('_');
+      const keyParts=id.substring(0,lastUnderscore);
+      const val=id.substring(lastUnderscore+1);
+      data[keyParts]=val;
+    }
+  });
+  return data;
+}
+
+// ═══════════ FOTOS ═══════════
+function triggerPhotoUpload(){document.getElementById('inf_photo_input').click();}
+function handlePhotos(e){
+  const files=Array.from(e.target.files);
+  if(infPhotos.length+files.length>10){toast('warn','Maximo 10 fotos por informe.');return;}
+  files.forEach(f=>{
+    if(f.size>3*1024*1024){toast('warn',f.name+' supera 3MB.');return;}
+    const r=new FileReader();r.onload=ev=>{infPhotos.push({data:ev.target.result,name:f.name,desc:''});renderPhotosUI();};r.readAsDataURL(f);
+  });
+  e.target.value='';
+}
+function renderPhotosUI(){
+  const list=document.getElementById('inf_photos_list');
+  list.innerHTML=infPhotos.map((p,i)=>'<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--r);padding:8px;margin-bottom:6px"><img src="'+p.data+'" style="width:50px;height:50px;border-radius:6px;object-fit:cover;flex-shrink:0"><div style="flex:1;min-width:0"><input type="text" placeholder="Descripcion de la foto..." value="'+esc(p.desc)+'" onchange="infPhotos['+i+'].desc=this.value" style="font-size:12px;padding:5px 8px"></div><button class="btn danger sm icon" onclick="removePhoto('+i+')"><i class="ti ti-x"></i></button></div>').join('');
+}
+function removePhoto(i){infPhotos.splice(i,1);renderPhotosUI();}
+
+// ═══════════ SUGERENCIAS Y CAMPOS MAQUINA ═══════════
+function sugName(){
+  const v=document.getElementById('nc_n').value.toLowerCase();
+  const b=document.getElementById('nc_sg'),t=document.getElementById('nc_sgt');
+  if(v.length<3){b.style.display='none';return;}
+  const rules=[[['metal','acero','taller','industri'],'Metalmecanica: preguntar materiales, espesores y tipo de maquina.'],[['plast','acril'],'Plasticos: preguntar si usan CO2 o router.'],[['mad','muebl','carpint'],'Carpinteria: Router CNC o CO2.'],[['grab','troqu'],'Grabado: posible marcadora laser.'],[['autom','vehic'],'Automotriz: posible laser fibra de alta potencia.']];
+  for(const[kws,msg]of rules){if(kws.some(k=>v.includes(k))){t.textContent=msg;b.style.display='flex';return;}}b.style.display='none';
+}
+function selTipo(tipo,el){
+  curTipo=tipo;
+  const cls={laser:'s-laser',co2:'s-co2',marcado:'s-marcado',plasma:'s-plasma',router:'s-router',otro:'s-otro'};
+  document.querySelectorAll('#tChips .chip').forEach(c=>c.className='chip');el.className='chip '+(cls[tipo]||'s-otro');
+  const msgs={laser:'Laser fibra: completa datos opticos (lentes sup/inf, ceramico, cable sensor) y gases.',co2:'CO2: registrar tubo, lentes, espejos 1/2/3 y sistema de turbo.',marcado:'Marcado laser: potencia, longitud de onda, lente F-theta y ventana de proteccion.',plasma:'Plasma CNC: amperaje, electrodo, nozzle, shield y THC.',router:'Router CNC: husillo, RPM, collet, tuerca (nut) y fresa.',otro:'Registrar datos tecnicos basicos.'};
+  document.getElementById('mq_sgt').textContent=msgs[tipo]||'';document.getElementById('mq_sg').style.display='flex';
+  buildFields(tipo);
+}
+function dl(id,opts){return'<datalist id="'+id+'">'+opts.map(o=>'<option value="'+o+'">').join('')+'</datalist>';}
+function buildFields(tipo){
+  const c=document.getElementById('mq_campos');
+  if(tipo==='laser'){c.innerHTML=
+    '<div class="sfh"><i class="ti ti-tool"></i> Identificacion</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Marca equipo</label><input type="text" id="mq_marca" list="dl_mrc" placeholder="Bodor, HSG, LF...">'+dl('dl_mrc',TDATA.marcas)+'</div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo" placeholder="BCL 1530E..."></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio" placeholder="2022"></div></div>'+
+    '<div class="sfh"><i class="ti ti-bolt"></i> Fuente laser</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Marca fuente <span class="req">*</span></label><input type="text" id="mq_fuente" list="dl_fue" placeholder="Raycus, IPG, MAX...">'+dl('dl_fue',TDATA.fuentes)+'</div><div class="fg"><label class="fl">Potencia fuente <span class="req">*</span></label><input type="text" id="mq_fuente_pot" placeholder="1000W, 1500W, 3000W"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje" placeholder="380V trifasico"></div><div class="fg"><label class="fl">Area de trabajo</label><input type="text" id="mq_area" placeholder="1500x3000mm"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Control CNC</label><input type="text" id="mq_control" list="dl_ctrl" placeholder="Cypcut, Fscut...">'+dl('dl_ctrl',TDATA.controles)+'</div><div class="fg"><label class="fl">Refrigeracion</label><input type="text" id="mq_refrig" placeholder="Chiller LNEYA..."></div></div>'+
+    '<div class="sfh"><i class="ti ti-eye"></i> Cabezal de corte y optica</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Marca cabezal <span class="req">*</span></label><input type="text" id="mq_cabezal" list="dl_cab" placeholder="Raytools, Precitec, WSX...">'+dl('dl_cab',TDATA.cabezales)+'</div><div class="fg"><label class="fl">Potencia cabezal</label><input type="text" id="mq_cab_pot" placeholder="1500W, 3000W"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Lente colimacion</label><input type="text" id="mq_colim" list="dl_col" placeholder="f=100mm...">'+dl('dl_col',TDATA.colimacion)+'</div><div class="fg"><label class="fl">Lente enfoque</label><input type="text" id="mq_enfoque" list="dl_enf" placeholder="f=150mm...">'+dl('dl_enf',TDATA.enfoque)+'</div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Lente protectora superior <span class="req">*</span></label><input type="text" id="mq_lente_prot" list="dl_lp" placeholder="D37 x 2mm...">'+dl('dl_lp',TDATA.lentes_prot)+'</div><div class="fg"><label class="fl">Lente protectora inferior</label><input type="text" id="mq_lente_prot_inf" placeholder="D37 x 2mm (salida)"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Ceramico porta-boquilla <span class="req">*</span></label><input type="text" id="mq_ceramico" list="dl_cer" placeholder="Raytools O32mm...">'+dl('dl_cer',TDATA.ceramicos)+'</div><div class="fg"><label class="fl">Cable sensor capacitivo</label><input type="text" id="mq_cable_sensor" placeholder="Modelo, estado..."></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Boquilla en uso <span class="req">*</span></label><input type="text" id="mq_boquilla" list="dl_bq" placeholder="Doble O1.5mm...">'+dl('dl_bq',TDATA.boquillas)+'</div><div class="fg"><label class="fl">Stock boquillas</label><input type="text" id="mq_bq_stock" placeholder="D/C O1.0 x5..."></div></div>'+
+    '<div class="sfh"><i class="ti ti-wind"></i> Gases de asistencia</div>'+
+    '<div class="fr3"><div class="fg"><label class="fl">Gases</label><input type="text" id="mq_gas" placeholder="N2 / O2 / Aire"></div><div class="fg"><label class="fl">Presion N2</label><input type="text" id="mq_pn2" placeholder="12-16 bar"></div><div class="fg"><label class="fl">Presion O2</label><input type="text" id="mq_po2" placeholder="0.5-0.8 bar"></div></div>'+
+    '<div class="sfh"><i class="ti ti-layers"></i> Materiales y consumibles</div>'+
+    '<div class="fg"><label class="fl">Materiales habituales</label><input type="text" id="mq_mats" list="dl_mat" placeholder="Acero inox, carbono...">'+dl('dl_mat',TDATA.materiales)+'</div>'+
+    '<div class="fg"><label class="fl">Consumibles en stock</label><input type="text" id="mq_consumibles" placeholder="Boquillas, lentes prot., ceramicos, fibra QBH..."></div>';}
+  else if(tipo==='co2'){c.innerHTML=
+    '<div class="fr"><div class="fg"><label class="fl">Marca</label><input type="text" id="mq_marca" placeholder="Thunder Laser, Trotec..."></div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje" placeholder="220V monofasico"></div><div class="fg"><label class="fl">Potencia tubo</label><input type="text" id="mq_fuente_pot" placeholder="80W, 100W, 130W"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Area</label><input type="text" id="mq_area" placeholder="600x900mm"></div><div class="fg"><label class="fl">Control/Software</label><input type="text" id="mq_control" placeholder="LightBurn, RDWorks..."></div></div>'+
+    '<div class="sfh"><i class="ti ti-eye"></i> Optica y alineacion</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Lente focal</label><input type="text" id="mq_lente_focal" placeholder="2 ZnSe, 2.5 ZnSe"></div><div class="fg"><label class="fl">Boquilla / Tobera</label><input type="text" id="mq_boquilla" placeholder="Tipo y diametro"></div></div>'+
+    '<div class="fr3"><div class="fg"><label class="fl">Espejo N1</label><input type="text" id="mq_espejo1" placeholder="Mo 25mm"></div><div class="fg"><label class="fl">Espejo N2</label><input type="text" id="mq_espejo2" placeholder="Mo 25mm"></div><div class="fg"><label class="fl">Espejo N3</label><input type="text" id="mq_espejo3" placeholder="Mo 25mm"></div></div>'+
+    '<div class="fg"><label class="fl">Turbo / Soplador de asistencia</label><input type="text" id="mq_turbo" placeholder="Tipo, potencia, estado..."></div>'+
+    '<div class="fg"><label class="fl">Consumibles</label><input type="text" id="mq_consumibles" placeholder="Tubo CO2, lente focal, espejos, correa..."></div>';}
+  else if(tipo==='marcado'){c.innerHTML=
+    '<div class="fr"><div class="fg"><label class="fl">Marca</label><input type="text" id="mq_marca" placeholder="Raycus, JPT, MOPA..."></div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Potencia (W)</label><input type="text" id="mq_fuente_pot" placeholder="20W, 30W, 50W"></div><div class="fg"><label class="fl">Longitud de onda</label><input type="text" id="mq_longonda" placeholder="1064nm / 532nm"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Area de marcado</label><input type="text" id="mq_area" placeholder="110x110mm"></div><div class="fg"><label class="fl">Lente F-theta</label><input type="text" id="mq_fteta" placeholder="f=163mm, f=254mm"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Ventana de proteccion</label><input type="text" id="mq_ventana_prot" placeholder="Diametro y tipo"></div><div class="fg"><label class="fl">Galvo</label><input type="text" id="mq_galvo" placeholder="JCZ, Scanlab..."></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Software</label><input type="text" id="mq_control" placeholder="EzCad2, LightBurn..."></div><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje" placeholder="220V monofasico"></div></div>'+
+    '<div class="fg"><label class="fl">Consumibles / optica</label><input type="text" id="mq_consumibles" placeholder="Lente F-theta, ventana protectora..."></div>';}
+  else if(tipo==='plasma'){c.innerHTML=
+    '<div class="fr"><div class="fg"><label class="fl">Marca fuente</label><input type="text" id="mq_marca" placeholder="Hypertherm, ESAB..."></div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje" placeholder="380V trifasico"></div><div class="fg"><label class="fl">Amperaje max.</label><input type="text" id="mq_fuente_pot" placeholder="65A, 85A, 200A"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Area mesa</label><input type="text" id="mq_area" placeholder="1500x3000mm"></div><div class="fg"><label class="fl">THC</label><input type="text" id="mq_thc" placeholder="Proma THC, Arcpro..."></div></div>'+
+    '<div class="sfh"><i class="ti ti-tool"></i> Consumibles de antorcha</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Electrodo (Electrode)</label><input type="text" id="mq_electrodo" placeholder="Ref. y estado"></div><div class="fg"><label class="fl">Boquilla (Nozzle)</label><input type="text" id="mq_nozzle" placeholder="Ref. y diametro"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Difusor (Swirl Ring)</label><input type="text" id="mq_shield" placeholder="Ref. y estado"></div><div class="fg"><label class="fl">Escudo (Shield Cup)</label><input type="text" id="mq_consumibles" placeholder="Ref. y estado"></div></div>';}
+  else if(tipo==='router'){c.innerHTML=
+    '<div class="fr"><div class="fg"><label class="fl">Marca</label><input type="text" id="mq_marca" placeholder="Multicam, Laguna..."></div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje" placeholder="380V trifasico"></div><div class="fg"><label class="fl">Potencia husillo</label><input type="text" id="mq_fuente_pot" placeholder="3kW, 6kW, 9kW"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Velocidad max. (RPM)</label><input type="text" id="mq_rpm" placeholder="18000, 24000 RPM"></div><div class="fg"><label class="fl">Area de trabajo</label><input type="text" id="mq_area" placeholder="1200x2400mm"></div></div>'+
+    '<div class="sfh"><i class="ti ti-tool"></i> Herramientas y accesorios</div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Collet / porta-fresa</label><input type="text" id="mq_collet" placeholder="ER20, ER32, ISO30..."></div><div class="fg"><label class="fl">Tuerca del collet (Nut)</label><input type="text" id="mq_nut" placeholder="Estado, tipo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Fresa instalada</label><input type="text" id="mq_fresa" placeholder="Tipo, diametro, material"></div><div class="fg"><label class="fl">Software CAM</label><input type="text" id="mq_control" placeholder="Vectric, Mastercam..."></div></div>'+
+    '<div class="fg"><label class="fl">Consumibles</label><input type="text" id="mq_consumibles" placeholder="Fresas, collets, correas, lubricante..."></div>';}
+  else{c.innerHTML=
+    '<div class="fr"><div class="fg"><label class="fl">Marca</label><input type="text" id="mq_marca"></div><div class="fg"><label class="fl">Modelo</label><input type="text" id="mq_modelo"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">N serie</label><input type="text" id="mq_serie" placeholder="S/N:"></div><div class="fg"><label class="fl">Ano</label><input type="text" id="mq_anio"></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">Voltaje</label><input type="text" id="mq_voltaje"></div><div class="fg"><label class="fl">Potencia</label><input type="text" id="mq_fuente_pot"></div></div>'+
+    '<div class="fg"><label class="fl">Consumibles</label><input type="text" id="mq_consumibles"></div>';}
+}
+
+// ═══════════ GUARDAR ═══════════
+async function saveClient(){
+  const name=gf('nc_n');if(!name){toast('err','El nombre es obligatorio.');return;}
+  if(editClientId){
+    const cli=clients.find(x=>x.id===editClientId);if(!cli)return;
+    const updates={name,ruc:gf('nc_r'),tipo:document.getElementById('nc_t').value,dir:gf('nc_d'),tel:gf('nc_p'),email:gf('nc_e'),contacto:gf('nc_c')};
+    const nota=gf('nc_no');
+    const notas=cli.notas||[];
+    if(nota)notas.push({text:nota,date:todayStr()});
+    updates.notas=notas;
+    try{
+      await fsUpdate('clients',editClientId,updates);
+      Object.assign(cli,updates);
+      closeModal('mNC');toast('ok','Cliente actualizado.');
+      editClientId=null;
+      if(demoMode)afterLoad();
+      if(selId===cli.id)renderDetail(cli);
+      filterClients();
+    }catch(e){toast('err','Error: '+e.message);}
+    return;
+  }
+  const client={name,ruc:gf('nc_r'),tipo:document.getElementById('nc_t').value,dir:gf('nc_d'),tel:gf('nc_p'),email:gf('nc_e'),contacto:gf('nc_c'),notas:[],maquinas:[]};
+  const nota=gf('nc_no');if(nota)client.notas.push({text:nota,date:todayStr()});
+  try{const id=await fsAdd('clients',client);closeModal('mNC');toast('ok','Cliente guardado.');if(demoMode){afterLoad();selClient(id);}else setTimeout(()=>selClient(id),600);}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function saveMachine(){
+  if(!curTipo){toast('err','Selecciona el tipo de maquina.');return;}
+  const m={id:editMaqId||uid(),tipo:curTipo,marca:gf('mq_marca'),modelo:gf('mq_modelo'),serie:gf('mq_serie'),anio:gf('mq_anio'),notas:gf('mq_notas'),consumibles:gf('mq_consumibles')};
+  if(curTipo==='laser')Object.assign(m,{fuente:gf('mq_fuente'),fuente_pot:gf('mq_fuente_pot'),voltaje:gf('mq_voltaje'),area:gf('mq_area'),control:gf('mq_control'),refrigeracion:gf('mq_refrig'),cabezal:gf('mq_cabezal'),cabezal_pot:gf('mq_cab_pot'),colimacion:gf('mq_colim'),enfoque:gf('mq_enfoque'),lente_prot:gf('mq_lente_prot'),lente_prot_inf:gf('mq_lente_prot_inf'),ceramico:gf('mq_ceramico'),cable_sensor:gf('mq_cable_sensor'),boquilla_uso:gf('mq_boquilla'),boquilla_stock:gf('mq_bq_stock'),gas_asistencia:gf('mq_gas'),presion_n2:gf('mq_pn2'),presion_o2:gf('mq_po2'),materiales:gf('mq_mats')});
+  else if(curTipo==='co2')Object.assign(m,{voltaje:gf('mq_voltaje'),fuente_pot:gf('mq_fuente_pot'),area:gf('mq_area'),lente_focal:gf('mq_lente_focal'),boquilla:gf('mq_boquilla'),espejo1:gf('mq_espejo1'),espejo2:gf('mq_espejo2'),espejo3:gf('mq_espejo3'),turbo:gf('mq_turbo'),control:gf('mq_control')});
+  else if(curTipo==='marcado')Object.assign(m,{fuente_pot:gf('mq_fuente_pot'),longonda:gf('mq_longonda'),area:gf('mq_area'),fteta:gf('mq_fteta'),ventana_prot:gf('mq_ventana_prot'),galvo:gf('mq_galvo'),control:gf('mq_control'),voltaje:gf('mq_voltaje')});
+  else if(curTipo==='plasma')Object.assign(m,{voltaje:gf('mq_voltaje'),fuente_pot:gf('mq_fuente_pot'),area:gf('mq_area'),thc:gf('mq_thc'),electrodo:gf('mq_electrodo'),nozzle:gf('mq_nozzle'),shield:gf('mq_shield')});
+  else if(curTipo==='router')Object.assign(m,{voltaje:gf('mq_voltaje'),fuente_pot:gf('mq_fuente_pot'),rpm:gf('mq_rpm'),area:gf('mq_area'),collet:gf('mq_collet'),nut:gf('mq_nut'),fresa:gf('mq_fresa'),control:gf('mq_control')});
+  else Object.assign(m,{voltaje:gf('mq_voltaje'),fuente_pot:gf('mq_fuente_pot')});
+  const cli=clients.find(x=>x.id===curMqCli);if(!cli)return;
+  cli.maquinas=cli.maquinas||[];
+  if(editMaqId){
+    const idx=cli.maquinas.findIndex(x=>x.id===editMaqId);
+    if(idx>=0)cli.maquinas[idx]=m;else cli.maquinas.push(m);
+  }else{
+    cli.maquinas.push(m);
+  }
+  try{
+    await fsUpdate('clients',curMqCli,{maquinas:cli.maquinas});
+    closeModal('mMQ');
+    toast('ok',editMaqId?'Maquina actualizada.':'Maquina guardada.');
+    editMaqId=null;editMaqCli=null;
+    renderDetail(cli);
+  }
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function deleteMachine(cliId,maqId){
+  if(!confirm('Eliminar esta maquina? Se perdera su informacion tecnica.'))return;
+  const cli=clients.find(x=>x.id===cliId);if(!cli)return;
+  cli.maquinas=(cli.maquinas||[]).filter(m=>m.id!==maqId);
+  try{
+    await fsUpdate('clients',cliId,{maquinas:cli.maquinas});
+    toast('ok','Maquina eliminada.');
+    renderDetail(cli);
+  }catch(e){toast('err','Error: '+e.message);}
+}
+async function saveNote(){
+  const text=gf('nt_tx');if(!text)return;
+  const cli=clients.find(x=>x.id===curNtCli);if(!cli)return;
+  cli.notas=cli.notas||[];cli.notas.push({text,date:todayStr()});
+  try{await fsUpdate('clients',curNtCli,{notas:cli.notas});closeModal('mNT');renderDetail(cli);toast('ok','Nota guardada.');}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function saveInforme(andPDF){
+  const cliId=gf('inf_cli');const fecha=gf('inf_fecha');
+  if(!cliId||!fecha||!curInfTipo){toast('err','Completa tipo de servicio, cliente y fecha.');return;}
+  if(!gf('inf_req')){toast('err','El requerimiento del cliente es obligatorio.');return;}
+  if(!gf('inf_sol')){toast('err','La solucion aplicada es obligatoria.');return;}
+  const cli=clients.find(x=>x.id===cliId);
+  const maqId=gf('inf_maq');
+  const maq=cli?(cli.maquinas||[]).find(m=>m.id===maqId):null;
+  const checklist=getChecklistData();
+  const inf={
+    clienteId:cliId,clienteName:cli?cli.name:'',
+    maquinaId:maqId||'',maquinaNombre:maq?((maq.marca||'')+' '+(maq.modelo||'')).trim():'',maquinaTipo:maq?maq.tipo:'',
+    tipoServicio:curInfTipo,fecha,ot:gf('inf_ot'),
+    horaInicio:gf('inf_hi'),horaFin:gf('inf_hf'),tecnico:gf('inf_tec'),
+    requerimiento:gf('inf_req'),desde:gf('inf_desde'),previo:gf('inf_prev'),
+    hallazgos:gf('inf_hall'),mediciones:gf('inf_med'),replica:gf('inf_replica'),
+    solucion:gf('inf_sol'),repuestos:gf('inf_reps'),
+    pruebas:gf('inf_pruebas'),resultado:gf('inf_resultado'),
+    diagnostico:gf('inf_diag'),causaRaiz:gf('inf_causa'),observaciones:gf('inf_obs'),
+    checklist,fotos:infPhotos.map(p=>({data:p.data,desc:p.desc})),
+    receptor:gf('inf_receptor'),proxMantenimiento:gf('inf_prox'),obsCliente:gf('inf_obscliente'),
+    maquinaData:maq||null,
+    clienteSnap:cli?{ruc:cli.ruc||'',dir:cli.dir||'',tel:cli.tel||'',contacto:cli.contacto||''}:null,
+  };
+
+  // Validar tamano del payload (limite Firestore: 1MB por documento)
+  const approxSize=new Blob([JSON.stringify(inf)]).size;
+  if(!demoMode&&approxSize>900000){
+    toast('err','Las fotos son demasiado pesadas para guardar ('+(approxSize/1024/1024).toFixed(1)+'MB). Reduce la cantidad de fotos o usa imagenes mas livianas (max. recomendado: 3-4 fotos).',8000);
+    return;
+  }
+
+  const btnSave=document.querySelector('#mINF .btn.success');
+  const btnPdf=document.querySelector('#mINF .btn.primary');
+  const origSave=btnSave?btnSave.innerHTML:'';
+  const origPdf=btnPdf?btnPdf.innerHTML:'';
+  if(btnSave){btnSave.disabled=true;btnSave.innerHTML='<i class="ti ti-loader-2 spin"></i> Guardando...';}
+  if(btnPdf){btnPdf.disabled=true;btnPdf.innerHTML='<i class="ti ti-loader-2 spin"></i> Guardando...';}
+
+  try{
+    let id,saved;
+    if(editInfId){
+      await fsUpdate('informes',editInfId,inf);
+      id=editInfId;saved={id,...inf};
+      if(demoMode){const idx=informes.findIndex(x=>x.id===editInfId);if(idx>=0)informes[idx]=saved;}
+      else{const idx=informes.findIndex(x=>x.id===editInfId);if(idx>=0)informes[idx]=saved;}
+      renderInfs();renderDash();
+      toast('ok','Informe actualizado correctamente.');
+    }else{
+      id=await fsAdd('informes',inf);
+      saved={id,...inf};
+      if(demoMode){informes.unshift(saved);}
+      renderInfs();renderDash();document.getElementById('ninf').textContent=informes.length;
+      toast('ok','Informe guardado correctamente.');
+    }
+    if(selId)renderDetail(clients.find(x=>x.id===selId));
+
+    if(andPDF){
+      toast('info','Generando PDF...',2000);
+      genPDFFromData(saved);
+    }
+
+    editInfId=null;
+    closeModal('mINF');
+  }catch(e){
+    toast('err','No se pudo guardar el informe: '+e.message,8000);
+    console.error('saveInforme error:',e);
+  }finally{
+    if(btnSave){btnSave.disabled=false;btnSave.innerHTML=origSave;}
+    if(btnPdf){btnPdf.disabled=false;btnPdf.innerHTML=origPdf;}
+  }
+}
+async function saveMant(){
+  const cliId=gf('mnt_cli');const fecha=gf('mnt_fecha');const tipo=gf('mnt_tipo');
+  if(!cliId||!fecha||!tipo){toast('err','Completa cliente, fecha y tipo.');return;}
+  const cli=clients.find(x=>x.id===cliId);
+  const mant={clienteId:cliId,clienteName:cli?cli.name:'',fecha,tipo,maquina:gf('mnt_maq'),desc:gf('mnt_desc'),proximoMant:gf('mnt_prox'),tecnico:gf('mnt_tec'),costo:gf('mnt_costo')};
+  try{await fsAdd('mantenimientos',mant);if(demoMode){mantenimientos.unshift({id:uid(),...mant});renderMants();renderDash();}closeModal('mMNT');toast('ok','Mantenimiento registrado.');}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function saveRec(){
+  const cliId=gf('rec_cli');const fecha=gf('rec_fecha');
+  if(!cliId||!fecha){toast('err','Selecciona cliente y fecha.');return;}
+  const cli=clients.find(x=>x.id===cliId);
+  const rec={clienteId:cliId,clienteName:cli?cli.name:'',fecha,tipo:gf('rec_tipo')||'Mantenimiento',desc:gf('rec_desc')};
+  try{await fsAdd('recordatorios',rec);if(demoMode){recordatorios.push({id:uid(),...rec});renderRecs();renderDash();}closeModal('mREC');toast('ok','Recordatorio guardado.');}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function saveRep(){
+  const cliId=gf('rep_cli');const nom=gf('rep_nom');
+  if(!cliId||!nom){toast('err','Selecciona cliente y nombre del repuesto.');return;}
+  const cli=clients.find(x=>x.id===cliId);
+  const rep={clienteId:cliId,clienteName:cli?cli.name:'',fecha:gf('rep_fecha')||todayISO(),nombre:nom,qty:gf('rep_qty')||'1',precio:gf('rep_precio'),maquina:gf('rep_maq'),ref:gf('rep_ref'),obs:gf('rep_obs')};
+  try{await fsAdd('repuestos',rep);if(demoMode){repuestos.unshift({id:uid(),...rep});renderReps();renderDash();}closeModal('mREP');toast('ok','Repuesto registrado.');}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function delClient(id){
+  if(!confirm('Eliminar este cliente y todos sus datos?'))return;
+  try{await fsDelete('clients',id);if(demoMode){clients=clients.filter(c=>c.id!==id);afterLoad();}selId=null;backClients();toast('ok','Cliente eliminado.');}
+  catch(e){toast('err','Error: '+e.message);}
+}
+async function delRec(id){
+  if(!confirm('Eliminar recordatorio?'))return;
+  try{await fsDelete('recordatorios',id);if(demoMode){recordatorios=recordatorios.filter(r=>r.id!==id);renderRecs();renderDash();}toast('ok','Eliminado.');}
+  catch(e){toast('err','Error.');}
+}
+async function delInf(id){
+  if(!confirm('Eliminar este informe?'))return;
+  try{await fsDelete('informes',id);if(demoMode){informes=informes.filter(i=>i.id!==id);renderInfs();renderDash();document.getElementById('ninf').textContent=informes.length;}toast('ok','Informe eliminado.');}
+  catch(e){toast('err','Error.');}
+}
+
+// ═══════════ GENERADOR PDF PROFESIONAL ═══════════
+function genPDF(infId){
+  const inf=informes.find(x=>x.id===infId);
+  if(!inf){toast('err','Informe no encontrado.');return;}
+  genPDFFromData(inf);
+}
+function genPDFFromData(inf){
+  if(!window.jspdf||!window.jspdf.jsPDF){toast('err','La libreria de PDF no cargo. Verifica tu conexion a internet y vuelve a intentar.',6000);return;}
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const brand=getBrand();
+    const W=210,M=14,CW=W-M*2;
+    let y=0;
+    const C1=[37,99,235],C2=[245,158,11],OK=[16,185,129],RED=[239,68,68],DARK=[15,23,42],GRAY=[100,116,139],LGT=[241,245,249];
+
+    function drawHeader(){
+      doc.setFillColor(59,114,217);doc.rect(0,0,W,36,'F');
+      doc.setFillColor(32,64,160);doc.rect(0,0,W,3,'F');
+      if(brand.logo){try{doc.addImage(brand.logo,'PNG',M,6,22,22,undefined,'FAST');}catch(e){}}
+      const tx=brand.logo?M+26:M;
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(15);doc.setFont(undefined,'bold');
+      doc.text(brand.name||'V&J Electronics Import SAC',tx,14);
+      doc.setFontSize(8);doc.setFont(undefined,'normal');doc.setTextColor(200,210,255);
+      const sub=[];if(brand.dir)sub.push(brand.dir);if(brand.tel)sub.push(brand.tel);
+      if(sub.length)doc.text(sub.join(' | '),tx,20);
+      const sub2=[];if(brand.email)sub2.push(brand.email);if(brand.web)sub2.push(brand.web);
+      if(sub2.length)doc.text(sub2.join(' | '),tx,26);
+      doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont(undefined,'bold');
+      doc.text(inf.ot||'S/N',W-M,13,{align:'right'});
+      doc.setFontSize(7);doc.setFont(undefined,'normal');doc.setTextColor(200,210,255);
+      doc.text('ORDEN DE TRABAJO',W-M,18,{align:'right'});
+      const tipoBadge=(inf.tipoServicio||'Servicio').toUpperCase();
+      doc.setFillColor(C2[0],C2[1],C2[2]);doc.roundedRect(W-M-32,21,32,8,2,2,'F');
+      doc.setTextColor(255,255,255);doc.setFontSize(7);doc.setFont(undefined,'bold');
+      doc.text(tipoBadge,W-M-16,26,{align:'center'});
+      doc.setFillColor(LGT[0],LGT[1],LGT[2]);doc.rect(0,36,W,10,'F');
+      doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFontSize(11);doc.setFont(undefined,'bold');
+      doc.text('INFORME DE SERVICIO TECNICO',W/2,43,{align:'center'});
+      y=52;
+    }
+    function drawFooter(pg){
+      const total=doc.internal.getNumberOfPages();
+      doc.setFillColor(C1[0],C1[1],C1[2]);doc.rect(0,285,W,12,'F');
+      doc.setTextColor(255,255,255);doc.setFontSize(7);doc.setFont(undefined,'normal');
+      doc.text(brand.name||'V&J Electronics Import SAC',M,292);
+      if(brand.web)doc.text(brand.web,W/2,292,{align:'center'});
+      doc.text('Pagina '+pg+' de '+total,W-M,292,{align:'right'});
+    }
+    function addPage(){doc.addPage();y=0;drawHeader();}
+    function chk(needed){if(needed===undefined)needed=20;if(y+needed>272)addPage();}
+    function secTitle(title){
+      chk(14);
+      doc.setFillColor(C1[0],C1[1],C1[2]);doc.rect(M,y,CW,8,'F');
+      doc.setFillColor(C2[0],C2[1],C2[2]);doc.rect(M,y,3,8,'F');
+      doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont(undefined,'bold');
+      doc.text(title.toUpperCase(),M+6,y+5.5);
+      y+=12;
+    }
+    function infoRow(label,value){
+      if(!value)return;chk(7);
+      doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(7.5);doc.setFont(undefined,'bold');
+      doc.text(label+':',M,y);
+      doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFont(undefined,'normal');
+      const lines=doc.splitTextToSize(String(value),CW-34);
+      doc.text(lines,M+34,y);
+      y+=Math.max(6,lines.length*5.5);
+    }
+    function textBlock(text,color){
+      if(!text)return;chk(12);
+      const lines=doc.splitTextToSize(String(text),CW-6);
+      const col=color||DARK;
+      doc.setFillColor(LGT[0],LGT[1],LGT[2]);doc.rect(M,y,CW,lines.length*5+6,'F');
+      doc.setDrawColor(220,220,220);doc.rect(M,y,CW,lines.length*5+6,'S');
+      doc.setTextColor(col[0],col[1],col[2]);doc.setFontSize(8.5);doc.setFont(undefined,'normal');
+      doc.text(lines,M+4,y+5);
+      y+=lines.length*5+10;
+    }
+    function renderChecklistPDF(maqTipo){
+      const cld=CHECKLISTS[maqTipo||'otro']||CHECKLISTS.otro;
+      const clData=inf.checklist||{};
+      const dotColor={ok:OK,obs:C2,fail:RED,na:GRAY};
+      const dotLabel={ok:'OK',obs:'OBS',fail:'FALLA',na:'N/A'};
+      ['pre','post'].forEach((phase,pi)=>{
+        const phaseLabel=phase==='pre'?'PRE - RECEPCION DEL EQUIPO':'POST - VALIDACION FINAL';
+        chk(14);
+        const headCol=pi===0?OK:C1;
+        doc.setFillColor(headCol[0],headCol[1],headCol[2]);doc.rect(M,y,CW,7,'F');
+        doc.setTextColor(255,255,255);doc.setFontSize(7.5);doc.setFont(undefined,'bold');
+        doc.text('CHECKLIST '+phaseLabel,M+4,y+5);y+=10;
+        cld[phase].forEach((sec,si)=>{
+          chk(12);
+          doc.setFillColor(240,245,255);doc.rect(M,y,CW,6,'F');
+          doc.setTextColor(C1[0],C1[1],C1[2]);doc.setFontSize(7);doc.setFont(undefined,'bold');
+          doc.text(sec.sec.toUpperCase(),M+3,y+4.5);y+=8;
+          sec.items.forEach((item,ii)=>{
+            chk(7);
+            const key='cl_'+phase+'_'+si+'_'+ii;
+            const status=clData[key]||'';
+            const col=dotColor[status]||GRAY;
+            const lbl=dotLabel[status]||'-';
+            doc.setFillColor(col[0],col[1],col[2]);doc.circle(M+3,y+1.5,2,'F');
+            doc.setTextColor(255,255,255);doc.setFontSize(5.5);doc.setFont(undefined,'bold');
+            doc.text(lbl.charAt(0),M+3,y+2.5,{align:'center'});
+            doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFontSize(8);doc.setFont(undefined,'normal');
+            const ll=doc.splitTextToSize(item.l,CW-32);
+            doc.text(ll,M+8,y+2);
+            doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(M+CW-18,y-1,18,5.5,1,1,'F');
+            doc.setTextColor(255,255,255);doc.setFontSize(6);doc.setFont(undefined,'bold');
+            doc.text(lbl,M+CW-9,y+3,{align:'center'});
+            y+=ll.length>1?ll.length*4.5:6;
+          });
+          y+=3;
+        });
+      });
+    }
+
+    drawHeader();
+
+    secTitle('1. Datos del cliente y equipo intervenido');
+    const cliObj=clients.find(x=>x.id===inf.clienteId)||inf.clienteSnap||{};
+    const col1X=M,col2X=M+CW/2+4;
+    doc.setFillColor(240,247,255);doc.rect(col1X,y,CW/2-2,32,'F');
+    doc.setTextColor(C1[0],C1[1],C1[2]);doc.setFontSize(7);doc.setFont(undefined,'bold');
+    doc.text('DATOS DEL CLIENTE',col1X+3,y+5);
+    let rowY=y+11;
+    const cF2=[['Empresa',inf.clienteName],['RUC/DNI',cliObj.ruc||''],['Direccion',cliObj.dir||''],['Telefono',cliObj.tel||''],['Contacto',cliObj.contacto||'']];
+    cF2.forEach(([l,v])=>{if(v){doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(7);doc.setFont(undefined,'bold');doc.text(l+':',col1X+3,rowY);doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFont(undefined,'normal');doc.text(String(v).substring(0,32),col1X+22,rowY);rowY+=5;}});
+    const maqY=y;
+    doc.setFillColor(255,248,235);doc.rect(col2X,maqY,CW/2-2,32,'F');
+    doc.setTextColor(C2[0],C2[1],C2[2]);doc.setFontSize(7);doc.setFont(undefined,'bold');
+    doc.text('EQUIPO INTERVENIDO',col2X+3,maqY+5);
+    const maqD=inf.maquinaData||{};
+    let mY=maqY+11;
+    const mF=[['Marca/Modelo',inf.maquinaNombre||''],['N Serie',maqD.serie||''],['Tipo',tLabel(inf.maquinaTipo||'otro')],['Fuente',maqD.fuente||''],['Cabezal',maqD.cabezal||'']];
+    mF.forEach(([l,v])=>{if(v){doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFont(undefined,'bold');doc.text(l+':',col2X+3,mY);doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFont(undefined,'normal');doc.text(String(v).substring(0,26),col2X+22,mY);mY+=5;}});
+    y=Math.max(rowY,mY)+4;
+    doc.setFillColor(LGT[0],LGT[1],LGT[2]);doc.rect(M,y,CW,10,'F');
+    doc.setFontSize(8);doc.setFont(undefined,'normal');doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+    const srv=[];srv.push('Fecha: '+fmtDate(inf.fecha));
+    if(inf.horaInicio||inf.horaFin)srv.push('Horario: '+(inf.horaInicio||'')+'-'+(inf.horaFin||'')+' hrs');
+    if(inf.tecnico)srv.push('Tecnico: '+inf.tecnico);
+    doc.text(srv.join('   |   '),M+4,y+6.5);y+=14;
+
+    secTitle('2. Requerimiento del cliente');
+    if(inf.requerimiento)textBlock(inf.requerimiento);
+    if(inf.desde)infoRow('Tiempo de la falla',inf.desde);
+    if(inf.previo)infoRow('Intervencion previa',inf.previo);
+
+    secTitle('3. Hallazgos e inspeccion tecnica');
+    if(inf.hallazgos)textBlock(inf.hallazgos);
+    if(inf.mediciones){
+      chk(12);doc.setFillColor(255,251,235);doc.rect(M,y,CW,6,'F');
+      doc.setTextColor(C2[0],C2[1],C2[2]);doc.setFontSize(7.5);doc.setFont(undefined,'bold');
+      doc.text('MEDICIONES Y VALORES REGISTRADOS',M+4,y+4.5);y+=8;
+      textBlock(inf.mediciones,[120,75,10]);
+    }
+    if(inf.replica)infoRow('Replica de la falla',inf.replica);
+
+    chk(20);secTitle('4. Checklist de revision tecnica');
+    renderChecklistPDF(inf.maquinaTipo);
+
+    chk(20);secTitle('5. Solucion aplicada');
+    if(inf.solucion)textBlock(inf.solucion);
+    if(inf.repuestos){chk(10);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(7.5);doc.setFont(undefined,'bold');doc.text('Repuestos utilizados:',M,y);y+=5;textBlock(inf.repuestos);}
+    const compRow=[];
+    if(compRow.length){chk(7);doc.setFillColor(209,250,229);doc.rect(M,y,CW,7,'F');doc.setTextColor(6,95,70);doc.setFontSize(8);doc.setFont(undefined,'bold');doc.text(compRow.join('   |   '),M+4,y+5);y+=11;}
+
+    chk(20);secTitle('6. Pruebas de funcionamiento');
+    if(inf.pruebas)textBlock(inf.pruebas);
+    if(inf.resultado){
+      chk(10);
+      const rColor=inf.resultado==='Satisfactorio'?OK:inf.resultado==='Parcial'?C2:RED;
+      doc.setFillColor(rColor[0],rColor[1],rColor[2]);doc.rect(M,y,CW,9,'F');
+      doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont(undefined,'bold');
+      doc.text('RESULTADO: '+inf.resultado.toUpperCase(),W/2,y+6,{align:'center'});y+=13;
+    }
+
+    chk(20);secTitle('7. Diagnostico final y analisis tecnico');
+    if(inf.diagnostico)textBlock(inf.diagnostico);
+    if(inf.causaRaiz){chk(10);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(7.5);doc.setFont(undefined,'bold');doc.text('ANALISIS DE CAUSA RAIZ:',M,y);y+=5;textBlock(inf.causaRaiz,[140,80,10]);}
+
+    if(inf.observaciones){chk(20);secTitle('8. Observaciones y recomendaciones');textBlock(inf.observaciones);}
+
+    if(inf.fotos&&inf.fotos.length){
+      chk(30);secTitle('9. Registro fotografico');
+      const perRow=3,pW=(CW-perRow*4)/perRow,pH=pW*0.75;
+      inf.fotos.forEach((foto,i)=>{
+        if(i%perRow===0)chk(pH+20);
+        const px=M+(i%perRow)*(pW+4),py=y;
+        try{doc.addImage(foto.data,'JPEG',px,py,pW,pH,undefined,'MEDIUM');}catch(e){doc.setFillColor(LGT[0],LGT[1],LGT[2]);doc.rect(px,py,pW,pH,'F');}
+        if(foto.desc){doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(6.5);doc.setFont(undefined,'italic');const dl=doc.splitTextToSize(foto.desc,pW);doc.text(dl,px,py+pH+3);}
+        if((i+1)%perRow===0||i===inf.fotos.length-1)y+=pH+(foto.desc?8:4);
+      });
+      y+=4;
+    }
+
+    chk(50);secTitle('10. Conformidad del servicio');
+    if(inf.obsCliente)infoRow('Observaciones del cliente',inf.obsCliente);
+    if(inf.proxMantenimiento){chk(7);doc.setFillColor(C2[0],C2[1],C2[2]);doc.rect(M,y,CW,7,'F');doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont(undefined,'bold');doc.text('Proximo mantenimiento programado: '+fmtDate(inf.proxMantenimiento),M+4,y+5);y+=11;}
+
+    chk(40);
+    const fW=(CW-20)/2;
+    doc.setDrawColor(GRAY[0],GRAY[1],GRAY[2]);doc.setLineWidth(0.3);
+    doc.line(M,y+22,M+fW,y+22);
+    doc.line(M+fW+20,y+22,M+CW,y+22);
+    doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFontSize(8);doc.setFont(undefined,'bold');
+    doc.text('Tecnico responsable',M+fW/2,y+27,{align:'center'});
+    doc.text(inf.receptor?'Recibido conforme':'Cliente / Responsable',M+fW+20+fW/2,y+27,{align:'center'});
+    doc.setFont(undefined,'normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc.setFontSize(7.5);
+    doc.text(inf.tecnico||'',M+fW/2,y+33,{align:'center'});
+    doc.text(inf.receptor||'',M+fW+20+fW/2,y+33,{align:'center'});
+    y+=38;
+
+    chk(16);
+    doc.setFillColor(15,23,42);doc.rect(M,y,CW,13,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont(undefined,'bold');
+    doc.text(brand.name||'V&J Electronics Import SAC',M+4,y+5.5);
+    doc.setFontSize(7);doc.setFont(undefined,'normal');doc.setTextColor(200,210,255);
+    const contactLine=[];if(brand.tel)contactLine.push('Tel: '+brand.tel);if(brand.email)contactLine.push(brand.email);if(brand.web)contactLine.push(brand.web);
+    if(contactLine.length)doc.text(contactLine.join('  |  '),M+4,y+10.5);
+    doc.setTextColor(245,158,11);doc.setFontSize(6.5);doc.setFont(undefined,'italic');
+    doc.text(brand.eslogan||'Especialistas en mantenimiento de maquinas CNC, laser y plasma',W-M,y+8,{align:'right'});
+
+    const totalPgs=doc.internal.getNumberOfPages();
+    for(let p=1;p<=totalPgs;p++){
+      doc.setPage(p);
+      drawFooter(p);
+      if(brand.logo){try{doc.saveGraphicsState();doc.setGState(new doc.GState({opacity:0.05}));doc.addImage(brand.logo,'PNG',W/2-25,130,50,50,undefined,'FAST');doc.restoreGraphicsState();}catch(e){}}
+    }
+
+    const fname=('Informe_'+(inf.ot||'ST')+'_'+(inf.clienteName||'Cliente')+'_'+(inf.fecha||todayISO())+'.pdf').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_.-]/g,'');
+    doc.save(fname);
+    toast('ok','PDF generado correctamente.');
+  }catch(e){toast('err','Error al generar PDF: '+e.message);console.error(e);}
+}
+
+// ═══════════ UTILS ═══════════
+function gf(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function uid(){return'id'+Date.now()+Math.random().toString(36).slice(2,6);}
+function todayISO(){return new Date().toISOString().split('T')[0];}
+function todayStr(){return new Date().toLocaleDateString('es-PE');}
+function fmtDate(d){if(!d)return'';try{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return d;}}
+function diasR(fecha){const h=new Date();h.setHours(0,0,0,0);const f=new Date(fecha+'T12:00:00');f.setHours(0,0,0,0);return Math.round((f-h)/(1000*60*60*24));}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function tLabel(t){return{laser:'Laser fibra',co2:'CO2',marcado:'Marcado laser',plasma:'Plasma CNC',router:'Router CNC',otro:'Otro'}[t]||t;}
+function setSyncState(s,lbl){document.getElementById('sdot').className='sdot'+(s==='sync'?' sync':s==='err'?' err':'');document.getElementById('slbl').textContent=lbl;}
+function toast(type,msg,dur){
+  if(dur===undefined)dur=4000;
+  const c=document.getElementById('toast'),el=document.createElement('div');
+  el.className='ti2 '+type;
+  const ic={ok:'ti-circle-check',err:'ti-alert-circle',info:'ti-info-circle',warn:'ti-alert-triangle'};
+  el.innerHTML='<i class="ti '+(ic[type]||'ti-info-circle')+'"></i>'+msg;
+  c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300);},dur);
+}
+function sampleClients(){return[{id:'d1',name:'Metalmecanica Torres S.A.C.',ruc:'20512345678',tipo:'empresa',dir:'Av. Industrial 234, Ate - Lima',tel:'+51 987 654 321',email:'torres@metal.pe',contacto:'Carlos Torres',notas:[{text:'Cliente frecuente. Acero inox y carbono.',date:'10/06/2025'}],maquinas:[{id:'m1',tipo:'laser',marca:'Bodor',modelo:'BCL 1530E',serie:'BD2022-0451',anio:'2022',fuente:'Raycus RFL-C1500',fuente_pot:'1500W',voltaje:'380V trifasico',area:'1500x3000mm',control:'Cypcut',refrigeracion:'Chiller LNEYA CW-6000',cabezal:'Raytools BM110',cabezal_pot:'1500W',colimacion:'f=100mm',enfoque:'f=150mm',lente_prot:'D37 x 2mm',lente_prot_inf:'D37 x 2mm',ceramico:'Raytools O32mm (M14)',cable_sensor:'Sensor capacitivo Raytools',boquilla_uso:'Doble O1.5mm',boquilla_stock:'D/C O1.5 x10',gas_asistencia:'N2 / O2 / Aire',presion_n2:'12-16 bar',presion_o2:'0.5-0.8 bar',materiales:'Acero inox 304, Carbono, Aluminio',consumibles:'Boquillas D/C, lentes D37x2mm, ceramico Raytools',notas:'Limpieza lente colimacion cada 45 dias.'}]}];}
+</script>
+</body>
+</html>
